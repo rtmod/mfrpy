@@ -1,0 +1,32 @@
+# pycache
+__pycache__
+*_cache
+# bytecode
+*.pyc
+
+# Mac stuff
+.DS_Store
+
+
+# Jupyter checkpoints
+*.ipynb_checkpoints
+..ipynb
+
+# TeX
+
+*.tex
+
+
+#Ignore emacs saves
+*~
+
+
+# Compiled python modules.
+*.pyc
+
+# Setuptools distribution folder.
+/dist/
+
+# Python egg metadata, regenerated from source files by setuptools.
+/*.egg-info*~
+
