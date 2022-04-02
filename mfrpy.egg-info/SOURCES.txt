@@ -1,0 +1,8 @@
+LICENSE.txt
+README.txt
+setup.py
+mfrpy.egg-info/PKG-INFO
+mfrpy.egg-info/SOURCES.txt
+mfrpy.egg-info/dependency_links.txt
+mfrpy.egg-info/requires.txt
+mfrpy.egg-info/top_level.txt

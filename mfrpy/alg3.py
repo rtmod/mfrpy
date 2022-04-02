@@ -1,5 +1,4 @@
 from igraph import *
-from igraph_graph import *
 
 def get_mfrs(graph, source, target, verbose = False):
 

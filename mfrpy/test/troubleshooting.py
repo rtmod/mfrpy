@@ -1,5 +1,5 @@
 from igraph import *
-from ...examplegraphs.igraph_graph import dag
+import igrap_graph as grafs
 
 def get_mfrs(graph, source, target):
 
@@ -126,4 +126,6 @@ def get_mfrs(graph, source, target):
     print("Number of MFRs:", len(final_MFRs))
     print('*' * 124)
 
-get_mfrs(exp_dcg, 0, 7)
+
+dag = grafs.dag
+get_mfrs(dag, 0, 9, 1)
