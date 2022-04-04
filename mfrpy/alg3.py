@@ -1,6 +1,6 @@
 from igraph import *
 
-def get_mfrs(graph, source, target, verbose = False):
+def get_mfrs(graph, source, target, verbose = False, mode = "em"):
 
     # initialization
     pointer = 0
@@ -85,11 +85,30 @@ def get_mfrs(graph, source, target, verbose = False):
         if not mfr in cycles:
             final_MFRs.append(mfr)
 
-    # output
+    #output options
+    ind = 1
     if verbose:
         print("Final MFRs:")
-        for mfr in final_MFRs:
-            print(mfr)
+    for mfr in final_MFRs:
+        # removes unecessary "last" row of mfr
+        modmfr = [chunk for chunk in mfr if chunk != [0,[]] ]
+        # 'mode' argument is for how user wants mfrs to be displayed
+        # set to "em" by default
+        if verbose:
+            if mode == "em": # "em" = edge matrix
+                print("\n", ind, ":")
+                for item in modmfr[::-1]:
+                    print(item[::-1])
+                # reverses order of everything (since alg is bottom-up)
+            elif mode == "el": # "el" = edge list
+                print(ind, ":", "\n")
+            elif mode == "id": # "id" = edge ids
+                print(ind, ":", "\n")
+        ind += 1
+
+    if verbose:
         print("Number of MFRs:", len(final_MFRs))
 
+
     return([final_MFRs, len(final_MFRs)])
+    # what should this return?

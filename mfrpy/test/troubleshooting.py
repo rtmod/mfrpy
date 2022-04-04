@@ -1,7 +1,16 @@
 from igraph import *
-import igrap_graph as grafs
 
-def get_mfrs(graph, source, target):
+exp_dcg = Graph(directed = True) # immitates expanded dcg graph
+exp_dcg.add_vertices(10)
+# edges (1, 5) & (2, 5) and (0, 2) & (4, 2) in dcg have synergy
+exp_dcg.add_edges([
+(0,1), (0,3), (3,4), (5,4), (4,6),
+(6,5), (5,7), (6,7), (0, 8), (4, 8), (8, 2), (1, 9), (2, 9), (9, 5)
+])
+exp_dcg.vs["name"] = ["I", "A", "B", "C", "D", "E", "F", "O", "c1", "c2"]
+exp_dcg.composite_nodes = [8, 9] # nodes 8 and 9 are composite nodes
+
+def get_mfrs(graph, source, target, mode = "em"):
 
     print("Initializing")
     print('*' * 124)
@@ -119,13 +128,25 @@ def get_mfrs(graph, source, target):
         if not mfr in cycles:
             final_MFRs.append(mfr)
 
+    #output options
+    ind = 1
     for mfr in final_MFRs:
-        print(mfr)
+        # removes unecessary "last" row of mfr
+        modmfr = [chunk for chunk in mfr if chunk != [0,[]] ]
+        # 'mode' argument is for how user wants mfrs to be displayed
+        if mode == "em": # "em" = edge matrix
+            print("\n", ind, ":")
+            for item in modmfr[::-1]:
+                print(item[::-1])
+                #reverses order of everything (since alg is bottom-up)
+        elif mode == "el": # "el" = edge list
+            print(ind, ":", "\n")
+        elif mode == "id": # "id" = edge ids
+            print(ind, ":", "\n")
+        ind += 1
 
     print('*' * 124)
     print("Number of MFRs:", len(final_MFRs))
     print('*' * 124)
 
-
-dag = grafs.dag
-get_mfrs(dag, 0, 9, 1)
+get_mfrs(exp_dcg, 0, 7, "em")
