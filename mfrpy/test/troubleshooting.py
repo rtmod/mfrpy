@@ -134,15 +134,20 @@ def get_mfrs(graph, source, target, mode = "em"):
         # removes unecessary "last" row of mfr
         modmfr = [chunk for chunk in mfr if chunk != [0,[]] ]
         # 'mode' argument is for how user wants mfrs to be displayed
+        edgelist = [item[::-1] for item in modmfr[::-1]]
+        #reverses order of everything (since alg is bottom-up)
         if mode == "em": # "em" = edge matrix
             print("\n", ind, ":")
-            for item in modmfr[::-1]:
-                print(item[::-1])
-                #reverses order of everything (since alg is bottom-up)
+            for item in edgelist:
+                print(item)
         elif mode == "el": # "el" = edge list
-            print(ind, ":", "\n")
+            print(ind, ":", edgelist, "\n")
         elif mode == "id": # "id" = edge ids
-            print(ind, ":", "\n")
+            ids = []
+            for chunk in edgelist:
+                ids.append(graph.get_eid(chunk[0], chunk[1]))
+            print(ind, ":", ids, "\n")
+            # not sure how to encode edges from composite nodes
         ind += 1
 
     print('*' * 124)
