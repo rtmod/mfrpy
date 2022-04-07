@@ -1,6 +1,6 @@
 from igraph import *
 
-def get_mfrs(graph, source, target, verbose = False, mode = "em"):
+def get_mfrs(graph, source, target, verbose = False, mode = "es"):
 
     # initialization
     pointer = 0
@@ -82,33 +82,53 @@ def get_mfrs(graph, source, target, verbose = False, mode = "em"):
         if not mfr in cycles:
             final_MFRs.append(mfr)
 
-    #output options
-    ind = 1
-    if verbose:
-        print("Final MFRs:")
     for mfr in final_MFRs:
         # removes unecessary "last" row of mfr
-        modmfr = [chunk for chunk in mfr if chunk != [0,[]] ]
+        for item in mfr:
+            if item == [0,[]]:
+                mfr.remove(item)
         # 'mode' argument is for how user wants mfrs to be displayed
-        edgelist = [item[::-1] for item in modmfr[::-1]]
-        #reverses order of everything (since alg is bottom-up)
-        if verbose:
-            if mode == "em": # "em" = edge matrix
-                print("\n", ind, ":")
-                for item in edgelist:
-                    print(item)
-            elif mode == "el": # "el" = edge list
-                print(ind, ":", edgelist, "\n")
-            elif mode == "id": # "id" = edge ids
-                ids = []
-                for chunk in edgelist:
-                    ids.append(graph.get_eid(chunk[0], chunk[1]))
-                    print(ind, ":", ids, "\n")
-                    # not sure how to encode edges from composite nodes
-        ind += 1
+        # reverses order of everything (since alg is bottom-up)
+        mfr.reverse()
+        for item in mfr:
+            item.reverse()
+        # flattens list
+        for item in mfr:
+            if type(item[0]) is list:
+                for i in item[0]:
+                    mfr.insert(mfr.index(item) + 1, [i, item[1]])
+                mfr.remove(item)
 
+    # output options
     if verbose:
-        print("Number of MFRs:", len(final_MFRs))
-
-    return([final_MFRs, len(final_MFRs)])
-    # what should this return?
+        print("Number of MFRs:", len(final_MFRs), "\n")
+        print("Final MFRs:")
+    if mode == "em": # "em" = edge matrix
+        ind = 1
+        for mfr in final_MFRs:
+            if verbose:
+                print("\n", ind, ":")
+                for chunk in mfr:
+                    print(chunk)
+            ind += 1
+        return([final_MFRs, len(final_MFRs)])
+    elif mode == "el": # "el" = edge list
+        ind = 1
+        for mfr in final_MFRs:
+            if verbose:
+                print("\n", ind, ":", mfr)
+            ind += 1
+        return([final_MFRs, len(final_MFRs)])
+    elif mode == "es": # "es" = edge sequence ids
+        ids = []
+        ind = 1
+        for mfr in final_MFRs:
+            id = []
+            for chunk in mfr:
+                id.append(graph.get_eid(chunk[0], chunk[1]))
+            ids.append(id)
+        if verbose:
+            for id in ids:
+                print(ind, ":", id, "\n")
+                ind += 1
+        return([ids, len(ids)])

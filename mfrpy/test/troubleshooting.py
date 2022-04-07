@@ -10,7 +10,7 @@ exp_dcg.add_edges([
 exp_dcg.vs["name"] = ["I", "A", "B", "C", "D", "E", "F", "O", "c1", "c2"]
 exp_dcg.composite_nodes = [8, 9] # nodes 8 and 9 are composite nodes
 
-def get_mfrs(graph, source, target, mode = "em"):
+def get_mfrs(graph, source, target, mode = "es"):
 
     print("Initializing")
     print('*' * 124)
@@ -128,30 +128,50 @@ def get_mfrs(graph, source, target, mode = "em"):
         if not mfr in cycles:
             final_MFRs.append(mfr)
 
-    #output options
-    ind = 1
     for mfr in final_MFRs:
         # removes unecessary "last" row of mfr
-        modmfr = [chunk for chunk in mfr if chunk != [0,[]] ]
+        for item in mfr:
+            if item == [0,[]]:
+                mfr.remove(item)
         # 'mode' argument is for how user wants mfrs to be displayed
-        edgelist = [item[::-1] for item in modmfr[::-1]]
-        #reverses order of everything (since alg is bottom-up)
-        if mode == "em": # "em" = edge matrix
+        # reverses order of everything (since alg is bottom-up)
+        mfr.reverse()
+        for item in mfr:
+            item.reverse()
+        # flattens list
+        for item in mfr:
+            if type(item[0]) is list:
+                for i in item[0]:
+                    mfr.insert(mfr.index(item) + 1, [i, item[1]])
+                mfr.remove(item)
+
+    # output options
+    if mode == "em": # "em" = edge matrix
+        ind = 1
+        for mfr in final_MFRs:
             print("\n", ind, ":")
-            for item in edgelist:
-                print(item)
-        elif mode == "el": # "el" = edge list
-            print(ind, ":", edgelist, "\n")
-        elif mode == "id": # "id" = edge ids
-            ids = []
-            for chunk in edgelist:
-                ids.append(graph.get_eid(chunk[0], chunk[1]))
-            print(ind, ":", ids, "\n")
-            # not sure how to encode edges from composite nodes
+            for chunk in mfr:
+                print(chunk)
+            ind += 1
+    elif mode == "el": # "el" = edge list
+        ind = 1
+        for mfr in final_MFRs:
+            print("\n", ind, ":", mfr)
+            ind += 1
+    elif mode == "es": # "es" = edge sequence ids
+        ids = []
+        ind = 1
+        for mfr in final_MFRs:
+            id = []
+            for chunk in mfr:
+                id.append(graph.get_eid(chunk[0], chunk[1]))
+            ids.append(id)
+        for id in ids:
+            print(ind, ":", id, "\n")
         ind += 1
 
     print('*' * 124)
     print("Number of MFRs:", len(final_MFRs))
     print('*' * 124)
 
-get_mfrs(exp_dcg, 0, 7, "em")
+get_mfrs(exp_dcg, 0, 7, "el")
