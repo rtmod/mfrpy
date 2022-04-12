@@ -3,16 +3,14 @@ from setuptools import setup
 setup(
     name='mfrpy',
     version='0.1.0',
-    author='Luis Sordo Vieira and Cory Brunson',
-    author_email='l.sordovieira@gmail.com',
+    author='Igor Sokolov and Cory Brunson',
+    author_email='jason.brunson@medicine.ufl.edu',
     scripts=[],
     url='',
     license='LICENSE.txt',
     description='Computations of minimal functional routes',
-    long_description=open('README.txt').read(),
+    long_description=open('README.md').read(),
     install_requires=[
-        "python-igraph",
-        "cvxpy",
-        "numpy",
+        "python-igraph"
     ],
 )
