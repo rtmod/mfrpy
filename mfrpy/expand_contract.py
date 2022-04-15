@@ -1,14 +1,32 @@
+"""
+Module for expanding a graph with synergistic and inhibitory edges
+"""
+
 from igraph import *
 
 def expand_graph(graph, synergy = []):
+    """
+    Given a graph and the synergy of its edges, return the expanded graph with
+    composite nodes
+
+    Uses *python-igraph*:
+    http://igraph.org/python/
+
+    Parameters:
+    graph  -- *igraph* Graph object
+    synergy -- list of synergy values of the edge sequence
+
+    """
     # if no synergy is provided then graph is already expanded
     if not synergy:
+        # graph.composite_nodes = []
+        graph.vs["composite"] = [0] * graph.vcount()
         return graph
     # creates a new expanded graph
     else:
         # initialization
         exp_graph = Graph(directed = True)
-        exp_graph.composite_nodes = []
+        # exp_graph.composite_nodes = []
         startcount = graph.vcount()
         names = graph.vs["name"]
         edgelist = graph.get_edgelist()
@@ -48,7 +66,7 @@ def expand_graph(graph, synergy = []):
             name = "c{}".format(i)
             i += 1
             names.append(name)
-            exp_graph.composite_nodes.append(v)
+            # exp_graph.composite_nodes.append(v)
 
         synstems = []
         stalks = []
@@ -70,5 +88,11 @@ def expand_graph(graph, synergy = []):
         exp_graph.add_vertices(graph.vcount())
         exp_graph.add_edges(edgelist)
         exp_graph.vs["name"] = names
-        
-        return(exp_graph)
+        exp_graph.vs["composite"] = [0]
+        for i in range(startcount, endcount):
+            exp_graph.vs[i]["composite"] = 1
+
+        return exp_graph
+
+        # implement inhibitory edge expansion function
+        # implement contraction function

@@ -8,7 +8,7 @@ dag.add_edges([
 (5,7), (5,9), (7,9), (6,8), (6,9), (8,9)
 ])
 dag.vs["name"] = ["I", "A", "B", "C", "D", "E", "F", "G", "H", "O"]
-dag.es["synergy"] = [0,0,0,0,1,1,0,0,0,0,2,0,0,2,0]
+dag.es["synergy"] = [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 2, 0, 0, 2, 0]
 # edges (1, 5) & (2, 5) and (5, 9) & (6, 9) have synergy
 
 dcg = Graph(directed = True) # directed cyclic graph, no composite nodes
@@ -18,7 +18,7 @@ dcg.add_edges([
 (6,5), (5,7), (6,7)
 ])
 dcg.vs["name"] = ["I", "A", "B", "C", "D", "E", "F", "O"]
-dcg.es["synergy"] = [0,1,0,0,1,2,2,0,0,0,0,0]
+dcg.es["synergy"] = [0, 1, 0, 0, 1, 2, 2, 0, 0, 0, 0, 0]
 # edges (1, 5) & (2, 5) and (0, 2) & (4, 2) have synergy
 
 exp_dag = Graph(directed = True) # immitates expanded dag graph
@@ -29,7 +29,9 @@ exp_dag.add_edges([
 ])
 exp_dag.vs["name"] = ["I", "A", "B", "C", "D", "E", "F", "G", "H", "O", "c1",
 "c2"]
-exp_dag.composite_nodes = [10, 11] # nodes 10 and 11 are composite nodes
+exp_dag.vs["composite"] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1]
+# exp_dag.composite_nodes = [10, 11]
+# nodes 10 and 11 are composite nodes
 
 exp_dcg = Graph(directed = True) # immitates expanded dcg graph
 exp_dcg.add_vertices(10)
@@ -38,4 +40,6 @@ exp_dcg.add_edges([
 (6,5), (5,7), (6,7), (0, 8), (4, 8), (8, 2), (1, 9), (2, 9), (9, 5)
 ])
 exp_dcg.vs["name"] = ["I", "A", "B", "C", "D", "E", "F", "O", "c1", "c2"]
-exp_dcg.composite_nodes = [8, 9] # nodes 8 and 9 are composite nodes
+exp_dag.vs["composite"] = [0, 0, 0, 0, 0, 0, 0, 0, 1, 1]
+# exp_dcg.composite_nodes = [8, 9]
+# nodes 8 and 9 are composite nodes

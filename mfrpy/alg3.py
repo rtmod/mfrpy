@@ -1,6 +1,33 @@
+"""
+Bottom-up algorithm for finding minimal functional routes (MFRs)
+"""
+
 from igraph import *
+from expand_contract import expand_graph
 
 def get_mfrs(graph, source, target, verbose = False, mode = "es"):
+    """
+    Given a graph, source node, and target node, returns the number of MFRs
+    from source to target and all MFRs.
+
+    Uses *python-igraph*:
+    http://igraph.org/python/
+
+    Parameters:
+    graph  -- *igraph* Graph object
+    source -- integer index of source node
+    target -- integer index of target node
+    verbose -- option to diplay MFRs, defaults to False
+    mode -- output option, defaults to "es"
+
+    Supported output options:
+    "em" -- returns edge matrices
+    "el" -- returns edge lists
+    "es" -- returns edge sequence indices
+
+    """
+    # expansion of graph to include composite and inhibitory nodes
+    graph = expand_graph(graph, graph.es["synergy"])
 
     # initialization
     pointer = 0
@@ -16,7 +43,6 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
     while pointer < num:
         flag = False
         c_MFR = all_MFRs[pointer]
-        # print("current MFR:", c_MFR)
         c_tag = tags[pointer]
         # while the current MFR is incomplete
         while not flag:
@@ -34,7 +60,8 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
 
             else:
                 # attempt to emulate expanded graph functionality
-                if not c_node in graph.composite_nodes:
+                # if not c_node in graph.composite_nodes:
+                if not graph.vs[c_node]["composite"]:
                     m = len(c_preds)
                     c_MFR[c_tag][1] = c_preds[0]
 
@@ -51,7 +78,7 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
                     num = num + m - 1
                     c_preds = [c_MFR[c_tag][1]]
 
-                # returns list of entries in MFR's first "column"
+                # list of entries in MFR's first "column"
                 stems = [row[0] for row in c_MFR]
 
                 # checks that all c_preds are in c_MFR
@@ -70,7 +97,7 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
 
         pointer = pointer + 1
 
-        # returns list of entries in MFRs second 'column'
+        # list of entries in MFRs second 'column'
         stalks = [row[1] for row in c_MFR]
         # checks for cycles and adds 'extraneous' MFRs to 'cycles' list
         if not [] in stalks:
@@ -111,14 +138,14 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
                 for chunk in mfr:
                     print(chunk)
             ind += 1
-        return([final_MFRs, len(final_MFRs)])
+        return [final_MFRs, len(final_MFRs)]
     elif mode == "el": # "el" = edge list
         ind = 1
         for mfr in final_MFRs:
             if verbose:
                 print("\n", ind, ":", mfr)
             ind += 1
-        return([final_MFRs, len(final_MFRs)])
+        return [final_MFRs, len(final_MFRs)]
     elif mode == "es": # "es" = edge sequence ids
         ids = []
         ind = 1
@@ -131,4 +158,4 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
             for id in ids:
                 print(ind, ":", id, "\n")
                 ind += 1
-        return([ids, len(ids)])
+        return [ids, len(ids)]
