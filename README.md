@@ -14,13 +14,13 @@ from mfrpy.examplegraphs import igraph_graph
 
 ### Initialize the example graphs:
 
-acyclic example:
+acyclic example
 
 ```py
 acyclic = igraph_graph.dag
 ```
 
-cyclic example:
+cyclic example
 
 ```py
 cyclic = igraph_graph.dcg
@@ -49,7 +49,7 @@ get_mfrs(
 
 graph -- *igraph* Graph object, 
 
-start node index -- int, 
+source node index -- int, 
 
 target node index -- int, 
 
@@ -70,6 +70,23 @@ Supported output options:
 
 "es" -- returns edge sequence indices
 ```
+
+# Encoding your graph's dependent edges
+
+### Add the synergy attribute to the edge sequence of your igraph Graph object:
+
+acyclic example
+
+```py
+acyclic.es["synergy"] = [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 2, 0, 0, 2, 0]
+```
+
+Here edges 4 and 5 are dependent on one another and so are edges 10 and 13. 
+However, edges 4 and 10, for example, are independent.
+
+0 represents no synergy (regular edge)
+
+Edges with the same value for the synergy attribute are dependent on one another
 
 
 
