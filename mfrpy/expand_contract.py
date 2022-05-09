@@ -144,6 +144,8 @@ def expand_inhibition(graph, inhibition = []):
         exp_graph.add_edges(edgelist)
         exp_graph.vs["name"] = names
 
+        return exp_graph
+
         # need to add clause to delete disconected components
 
 
