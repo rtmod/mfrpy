@@ -94,5 +94,57 @@ def expand_graph(graph, synergy = []):
 
         return exp_graph
 
-        # implement inhibitory edge expansion function
-        # implement contraction function
+def expand_inhibition(graph, inhibition = []):
+    """
+    Given a graph and inhibitory edges, return the expanded graph with
+    complimentary nodes and only activating edges
+
+    Uses *python-igraph*:
+    http://igraph.org/python/
+
+    Parameters:
+    graph  -- *igraph* Graph object
+    inhibition -- list of inhibition indicators of the edge sequence
+
+    """
+    if not inhibition:
+        graph.es["inhibition"] = [0] * graph.vcount()
+        return graph
+    else:
+        exp_graph = Graph(directed = True)
+        names = graph.vs["name"]
+        edgelist = graph.get_edgelist()
+        tochange = []
+
+        # finds inhibitory edges
+        for ind, val in enumerate(graph.es["inhibition"]):
+            if val:
+                tochange.append(edgelist[ind])
+
+        # removes inhibitory edges
+        for item in tochange:
+            edgelist.remove(item)
+        # flattens list of inhibitory edges and removes duplicates
+        flat = list(dict.fromkeys([item for tuple in tochange \
+        for item in tuple]))
+
+        # adds and names new nodes
+        complements = {}
+        for i in flat:
+            graph.add_vertices(1)
+            names.append("NOT {}".format(names[i]))
+            complements[i] = len(names)-1
+
+        # adds new edges
+        for edge in tochange:
+            edgelist.append((edge[0], complements.get(edge[1])))
+            edgelist.append((complements.get(edge[0]), edge[1]))
+
+        exp_graph.add_vertices(graph.vcount())
+        exp_graph.add_edges(edgelist)
+        exp_graph.vs["name"] = names
+
+        # need to add clause to delete disconected components
+
+
+# expand_inhibition(inhib, inhib.es["inhibition"])
