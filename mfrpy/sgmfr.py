@@ -3,7 +3,7 @@ Bottom-up algorithm for finding minimal functional routes (MFRs)
 """
 
 from igraph import *
-from mfrpy import expand_contract
+from mfrpy import update_expand
 
 def get_mfrs(graph, source, target, verbose = False, mode = "es"):
     """
@@ -26,8 +26,15 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
     "es" -- returns edge sequence indices
 
     """
+
+    synergistic = []
+    if 'synergy' in graph.es.attributes():
+        synergistic = graph.es["synergy"]
+    negatory = []
+    if 'inhibition' in graph.es.attributes():
+        negatory = graph.es["inhibition"]
     # expansion of graph to include composite and inhibitory nodes
-    graph = expand_contract.expand_graph(graph, graph.es["synergy"])
+    graph = update_expand.updates(graph, synergistic, negatory)
 
     # initialization
     pointer = 0

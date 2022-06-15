@@ -1,6 +1,3 @@
-"""
-Module for expanding a graph with synergistic and inhibitory edges
-"""
 
 from igraph import *
 
