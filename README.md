@@ -3,7 +3,7 @@
 ### Import the module:
 
 ```py
-from mfrpy import alg3
+from mfrpy import sgmfr
 ```
 
 ### Import the example graphs:
@@ -32,13 +32,13 @@ cyclic = igraph_graph.dcg
 Call the get_mfrs() method:
 
 ```py
-alg3.get_mfrs(acyclic, 0, 9, True, "el")
+sgmfr.get_mfrs(acyclic, 0, 9, True, "el")
 ```
 
 or
 
 ```py
-alg3.get_mfrs(cyclic, 0, 7, True, "el")
+sgmfr.get_mfrs(cyclic, 0, 7, True, "el")
 ```
 
 
