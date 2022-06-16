@@ -46,7 +46,7 @@ def updates(graph, synergy = [], inhibition = []):
 
         #synergy is checked first, then inhibition if applicable
         if synergy[edgelist.index(edge)] == synthrshld:
-            for e in synergies[1-synthrshld]:
+            for e in synergies[synthrshld-1]:
                 if e in inhibs:
                     updatetable[edge[1]].append(
                     ['~{}'.format(graph.vs["name"][ed[0]]) \
@@ -55,26 +55,29 @@ def updates(graph, synergy = [], inhibition = []):
                     synthrshld += 1
                     break
                 else:
-                    updatetable[edge[1]].append(['{}'.format(
+                    entrylst = ['{}'.format(
                     graph.vs["name"][ed[0]]) for ed in synergies[1-synthrshld]]
-                    )
+                    entry = '({})'.format("&".join(entrylst))
+                    updatetable[e[1]].append(entry)
                     synthrshld += 1
                     break
             continue
 
         # inhibitory edges also checked for synergy to not double count
-        if edge in inhibs:
+        elif edge in inhibs:
             if synergy[edgelist.index(edge)]:
                 pass
             else:
                 updatetable[edge[1]].append(
                 '~{}'.format(graph.vs["name"][edge[0]])
                 )
-        else:
-            updatetable[edge[1]].append(
-            '{}'.format(graph.vs["name"][edge[0]])
-            )
 
+        else:
+            if graph.es["synergy"][edgelist.index(edge)] > 0:
+                pass
+            else:
+                smurf = '{}'.format(graph.vs["name"][edge[0]])
+                updatetable[edge[1]].append(smurf)
     # flattens and standardizes table entries
     # first entry becomes None data type
     for entry in updatetable:
@@ -88,12 +91,12 @@ def updates(graph, synergy = [], inhibition = []):
         updatetable[updatetable.index(entry)] = "|".join(entry)
 
     # entry table finalized with node indices
-    updatetable = [[count for count, value in enumerate(updatetable)],
-    updatetable]
+    updatetable = [
+    graph.vs["name"],
+    updatetable
+    ]
 
     return updatetable
-
-
 
 def expand(graph, table):
     """
@@ -126,7 +129,6 @@ def expand(graph, table):
     for edge in inhibs:
         for node in edge:
             if "~{}".format(graph.vs["name"][node]) not in names:
-                graph.add_vertices(1)
                 name = "~{}".format(graph.vs["name"][node])
                 names.append(name)
     tempcount = graph.vcount()
@@ -139,15 +141,18 @@ def expand(graph, table):
     lnegs = [[],[]]
 
     # expands the graph
+    negcount = 0
     compcount = 0
-    for index in table[0]:
+    indices = [count for count, value in enumerate(table[0])]
+    for index in indices:
         for node in table[1][index].split("|"):
 
             # if NOT node, take the logical negation and add/remove edges
             if '~' in node:
+                negcount += 1
                 logneg = to_dnf("~({})".format(node))
                 lnegs[0].append(to_dnf("~({})".format(graph.vs["name"]
-                [table[0][index]])))
+                [indices[index]])))
                 lnegs[1].append(logneg)
                 temp = node
                 if '&' in node:
@@ -165,7 +170,8 @@ def expand(graph, table):
                 graph.add_vertices(1)
 
                 # deletes previous synergistic edges
-                for syn in node.split('&'):
+                for syn in node.replace('(', '').replace(')', '').replace(' ',
+                 '').split('&'):
                     edgelist.remove((names.index(syn), index))
 
                 # gives names to new composite nodes
@@ -173,7 +179,8 @@ def expand(graph, table):
                 compcount += 1
                 names.append(name)
                 edgelist.append((tempcount + counter - 1, index))
-                for syn in node.split('&'):
+                for syn in node.replace('(', '').replace(')', '').replace(' ',
+                 '').split('&'):
                     edgelist.append((names.index(syn), tempcount + counter - 1))
 
             elif not node == '':
@@ -207,11 +214,10 @@ def expand(graph, table):
             edgelist.append((names.index(str(node)), names.index(str(source))))
 
     edgelist = list(dict.fromkeys(edgelist))
-    print(edgelist)
 
     # finalizes the graph
     exp_graph = Graph(directed = True)
-    exp_graph.add_vertices(graph.vcount())
+    exp_graph.add_vertices(len(names))
     exp_graph.add_edges(edgelist)
     exp_graph.vs["name"] = names
     exp_graph.vs["composite"] = [0 * graph.vcount()]

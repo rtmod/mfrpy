@@ -34,7 +34,7 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
     if 'inhibition' in graph.es.attributes():
         negatory = graph.es["inhibition"]
     # expansion of graph to include composite and inhibitory nodes
-    graph = update_expand.updates(graph, synergistic, negatory)
+    graph = update_expand.expand(graph, update_expand.updates(graph, synergistic, negatory))
 
     # initialization
     pointer = 0
