@@ -1,7 +1,7 @@
 from igraph import *
 from sympy.logic.boolalg import to_dnf
 
-def updates(graph, synergy = [], inhibition = []):
+def updates(graph, synergy = [], inhibition = [], verbose = 0):
     """
     Given a graph and synergy/inhibition edge values, return the booleans
     update table of the graph
@@ -13,6 +13,7 @@ def updates(graph, synergy = [], inhibition = []):
     graph  -- *igraph* Graph object
     synergy -- list of synergy values of the edge sequence
     inhibition -- list of binary inhibition values of the edge sequence
+    verbose -- option to print update table
 
     """
     # initializes update table
@@ -40,65 +41,70 @@ def updates(graph, synergy = [], inhibition = []):
         syn = [edgelist[i] for i in ind]
         synergies.append(syn)
 
-    # converts synergy and inhibition data to table entries
-    synthrshld = 1
-    for edge in edgelist:
+    #converts synergy and inhibition data to table entries
+    #synergy is checked first, then inhibition if applicable
+    for group in synergies:
+        predlist = []
+        for e in group:
+            if e in inhibs:
+                negpred = '~{}'.format(graph.vs["name"][e[0]])
+                predlist.append(negpred)
 
-        #synergy is checked first, then inhibition if applicable
-        if synergy[edgelist.index(edge)] == synthrshld:
-            for e in synergies[synthrshld-1]:
-                if e in inhibs:
-                    updatetable[edge[1]].append(
-                    ['~{}'.format(graph.vs["name"][ed[0]]) \
-                    for ed in synergies[1-synthrshld]]
-                    )
-                    synthrshld += 1
-                    break
-                else:
-                    entrylst = ['{}'.format(
-                    graph.vs["name"][ed[0]]) for ed in synergies[1-synthrshld]]
-                    entry = '({})'.format("&".join(entrylst))
-                    updatetable[e[1]].append(entry)
-                    synthrshld += 1
-                    break
-            continue
-
-        # inhibitory edges also checked for synergy to not double count
-        elif edge in inhibs:
-            if synergy[edgelist.index(edge)]:
-                pass
             else:
-                updatetable[edge[1]].append(
-                '~{}'.format(graph.vs["name"][edge[0]])
-                )
+                pred = '{}'.format(graph.vs["name"][e[0]])
+                predlist.append(pred)
+        predstring = '({})'.format("&".join(predlist))
+        updatetable[e[1]].append(predstring)
+
+    #remaining edges
+    or_edges = list(set(edgelist)-
+    set([edge for group in synergies for edge in group]))
+
+    for edge in or_edges:
+        # inhibitory edges also checked for synergy to not double count
+        if edge in inhibs:
+            updatetable[edge[1]].append(
+            '~{}'.format(graph.vs["name"][edge[0]])
+            )
 
         else:
-            if graph.es["synergy"][edgelist.index(edge)] > 0:
-                pass
-            else:
-                smurf = '{}'.format(graph.vs["name"][edge[0]])
-                updatetable[edge[1]].append(smurf)
+            updatetable[edge[1]].append(
+            '{}'.format(graph.vs["name"][edge[0]])
+            )
+
     # flattens and standardizes table entries
-    # first entry becomes None data type
     for entry in updatetable:
-        for block in entry:
-            if isinstance(block, str):
-                pass
-            else:
-                updatetable[updatetable.index(entry)].append("&".join(block))
-                updatetable[updatetable.index(entry)].remove(block)
-                break
-        updatetable[updatetable.index(entry)] = "|".join(entry)
+        # first entry becomes empty string
+        if not entry:
+            updatetable[updatetable.index(entry)] = ""
+        else:
+            final_string = '{}'.format("|".join(entry))
+            updatetable[updatetable.index(entry)] = final_string
+
+    #computes logical negations for inhibitory nodes
+    logical_negations = [[], []]
+    for expression in updatetable:
+        if '~' in expression:
+            logical_negations[0].append(
+            "~{}".format(graph.vs["name"][updatetable.index(expression)])
+            )
+            negation = str(to_dnf("~({})".format(expression))).replace(" ", "")
+            logical_negations[1].append(negation)
 
     # entry table finalized with node indices
     updatetable = [
-    graph.vs["name"],
-    updatetable
+    graph.vs["name"]+logical_negations[0],
+    updatetable+logical_negations[1]
     ]
+
+    #option to see the table displayed
+    if verbose:
+        for entry in updatetable[0]:
+            print(entry, "=", updatetable[1][updatetable[0].index(entry)])
 
     return updatetable
 
-def expand(graph, table):
+def expand(graph, table, verbose = 0):
     """
     Given a graph and an update table, return the expanded graph with
     negatory and composite nodes
@@ -110,6 +116,8 @@ def expand(graph, table):
     Parameters:
     graph  -- *igraph* Graph object
     table -- 2 by n boolean update table for the graph with n nodes
+    verbose -- boolean denoting whether expanded graph will be printed and
+    plotted
 
     """
 
@@ -118,110 +126,73 @@ def expand(graph, table):
     startcount = graph.vcount()
     names = graph.vs["name"]
 
-    # keeps track of inhibitory edges
-    inhibs = []
-    if 'inhibition' in graph.es.attributes():
-        for ind, val in enumerate(graph.es["inhibition"]):
-            if val:
-                inhibs.append(edgelist[ind])
-
     #adds NOT nodes to match inhibition
-    for edge in inhibs:
-        for node in edge:
-            if "~{}".format(graph.vs["name"][node]) not in names:
-                name = "~{}".format(graph.vs["name"][node])
-                names.append(name)
-    tempcount = graph.vcount()
-    graph.vs["name"] = names
+    for source in table[0]:
+        if not '~' in source:
+            name = "~{}".format(source)
+            names.append(name)
 
-    # initializes variables for graph expansion
-    counter = 0
-    for i in inhibs:
-        edgelist.remove(i)
-    lnegs = [[],[]]
+    #adds AND nodes to match synergy
+    for i in range("".join(table[1]).count('(')):
+        name = "c{}".format(i+1)
+        names.append(name)
 
-    # expands the graph
-    negcount = 0
-    compcount = 0
-    indices = [count for count, value in enumerate(table[0])]
-    for index in indices:
-        for node in table[1][index].split("|"):
+    names = list(dict.fromkeys(names))
 
-            # if NOT node, take the logical negation and add/remove edges
-            if '~' in node:
-                negcount += 1
-                logneg = to_dnf("~({})".format(node))
-                lnegs[0].append(to_dnf("~({})".format(graph.vs["name"]
-                [indices[index]])))
-                lnegs[1].append(logneg)
-                temp = node
-                if '&' in node:
-                    temp = node.split("&")
-                if isinstance(temp, str):
-                    edgelist.append((names.index(temp), index))
-                else:
-                    for sub in temp:
-                        edgelist.append((names.index(sub), index))
+    compcount = "".join(table[1]).count('(')
+    edgelist = []
+    group_counter = 0
+    # adds edges to the new graph
+    for entry in table[0]:
+        for node in table[1][table[0].index(entry)].replace('(', '')\
+        .replace(')', '').split("|"):
 
             # if AND node, make composite node
             if '&' in node:
-                counter += 1
-                # adds new vertices
-                graph.add_vertices(1)
-
+                group_counter += 1
                 # deletes previous synergistic edges
-                for syn in node.replace('(', '').replace(')', '').replace(' ',
-                 '').split('&'):
-                    edgelist.remove((names.index(syn), index))
+                for syn in node.split('&'):
+                    edgelist.append(
+                    (names.index(syn),
+                    names.index("c{}".format(group_counter)))
+                    )
 
-                # gives names to new composite nodes
-                name = "c{}".format(counter)
-                compcount += 1
-                names.append(name)
-                edgelist.append((tempcount + counter - 1, index))
-                for syn in node.replace('(', '').replace(')', '').replace(' ',
-                 '').split('&'):
-                    edgelist.append((names.index(syn), tempcount + counter - 1))
+                edgelist.append(
+                (names.index("c{}".format(group_counter)), names.index(entry))
+                )
 
             elif not node == '':
-                edgelist.append((names.index(node), index))
-
-    # expands the graph for logical negations
-    for node in lnegs[1]:
-        source = lnegs[0][lnegs[1].index(node)]
-
-        # if AND node, make composite node
-        if '&' in str(node):
-            counter += 1
-            # adds new vertices
-            graph.add_vertices(1)
-            # gives names to new composite nodes
-            name = "c{}".format(counter)
-            compcount += 1
-            names.append(name)
-            edgelist.append((tempcount + counter - 1, names.index(str(source))))
-            for syn in node.replace('(', '').replace(')', '').replace(' ',
-             '').split('&'):
-                edgelist.append((names.index(syn), tempcount + counter - 1))
-
-        # if NOT node, take the logical negation and add/remove edges
-        if '|' in str(node):
-            for x in str(node).replace('(', '').replace(')', '').replace(' ',
-             '').split("|"):
-                edgelist.append((names.index(str(x)), names.index(str(source))))
-
-        else:
-            edgelist.append((names.index(str(node)), names.index(str(source))))
-
-    edgelist = list(dict.fromkeys(edgelist))
+                edgelist.append((names.index(node), names.index(entry)))
 
     # finalizes the graph
+    edgelist = list(dict.fromkeys(edgelist))
     exp_graph = Graph(directed = True)
     exp_graph.add_vertices(len(names))
     exp_graph.add_edges(edgelist)
+    #removes singleton nodes
+    #for node in names:
+    #    if not exp_graph.neighbors(names.index(node)):
+    #        exp_graph.delete_vertices(names.index(node))
+    #        names.remove(node)
     exp_graph.vs["name"] = names
+    exp_graph.vs["label"] = exp_graph.vs["name"]
     exp_graph.vs["composite"] = [0 * graph.vcount()]
-    for i in range(graph.vcount()-compcount, graph.vcount()):
+    for i in range((len(names)-compcount), len(names)):
         exp_graph.vs[i]["composite"] = 1
 
+
+    if verbose:
+        print(exp_graph)
+        print(exp_graph.vs["composite"])
+        plot(exp_graph, vertex_size = 18, vertex_shape = "square",
+        edge_arrow_size = 0.5, vertex_color = "white", bbox=(0, 0, 500, 500))
     return exp_graph
+
+
+#g = Graph.Read_GraphML("bordetellaeGraph.xml")
+#g.vs["name"] = g.vs["id"]
+#tab = updates(g, g.es["synergy"], g.es["inhibition"], 1)
+#print(tab)
+
+
+#expand(g, tab, 1)
