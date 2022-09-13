@@ -1,4 +1,4 @@
-from igraph import *
+from igraph import Graph, plot
 from sympy.logic.boolalg import to_dnf
 
 def updates(graph, synergy = [], inhibition = [], verbose = 0):
@@ -127,17 +127,19 @@ def expand(graph, table, verbose = 0):
     names = graph.vs["name"]
 
     #adds NOT nodes to match inhibition
-    for source in table[0]:
-        if not '~' in source:
-            name = "~{}".format(source)
-            names.append(name)
+    if "inhibition" in graph.es.attributes():
+        for source in table[0]:
+            if not '~' in source:
+                n1 = "~{}".format(source)
+                names.append(n1)
 
     #adds AND nodes to match synergy
     for i in range("".join(table[1]).count('(')):
-        name = "c{}".format(i+1)
-        names.append(name)
+        n2 = "c{}".format(i+1)
+        names.append(n2)
 
     names = list(dict.fromkeys(names))
+
 
     compcount = "".join(table[1]).count('(')
     edgelist = []
@@ -170,29 +172,27 @@ def expand(graph, table, verbose = 0):
     exp_graph.add_vertices(len(names))
     exp_graph.add_edges(edgelist)
     #removes singleton nodes
-    #for node in names:
-    #    if not exp_graph.neighbors(names.index(node)):
-    #        exp_graph.delete_vertices(names.index(node))
-    #        names.remove(node)
+    isolated = []
+    for node in names:
+        if exp_graph.neighbors(names.index(node)) == []:
+            isolated.append(names.index(node))
+    exp_graph.delete_vertices(isolated)
+    for index in isolated:
+        names.remove(names[index])
     exp_graph.vs["name"] = names
     exp_graph.vs["label"] = exp_graph.vs["name"]
     exp_graph.vs["composite"] = [0 * graph.vcount()]
     for i in range((len(names)-compcount), len(names)):
         exp_graph.vs[i]["composite"] = 1
 
-
     if verbose:
         print(exp_graph)
-        print(exp_graph.vs["composite"])
-        plot(exp_graph, vertex_size = 18, vertex_shape = "square",
-        edge_arrow_size = 0.5, vertex_color = "white", bbox=(0, 0, 500, 500))
+        layout = exp_graph.layout("lgl")
+        plot(exp_graph, vertex_size = 30,
+        edge_arrow_size = 0.75, vertex_color = "white", bbox=(0, 0, 500, 500))
     return exp_graph
-
 
 #g = Graph.Read_GraphML("bordetellaeGraph.xml")
 #g.vs["name"] = g.vs["id"]
 #tab = updates(g, g.es["synergy"], g.es["inhibition"], 1)
-#print(tab)
-
-
 #expand(g, tab, 1)

@@ -3,7 +3,8 @@ Bottom-up algorithm for finding minimal functional routes (MFRs)
 """
 
 from igraph import *
-from mfrpy import update_expand
+import update_expand
+import examplegraphs.igraph_graph
 
 def get_mfrs(graph, source, target, verbose = False, mode = "es"):
     """
@@ -34,20 +35,33 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
     if 'inhibition' in graph.es.attributes():
         negatory = graph.es["inhibition"]
     # expansion of graph to include composite and inhibitory nodes
-    graph = update_expand.expand(graph, update_expand.updates(graph, synergistic, negatory))
+    graph = update_expand.expand(graph, update_expand.updates(graph,
+    synergistic, negatory))
 
     # initialization
     pointer = 0
     num = 1
-    # tags is an array of integers, python starts counting from 0
+    # tags is an array of integers that keeps track of the index of a node in
+    # the current MFR
     tags = [0]
     flag = False
     cycles = []
     net = graph.get_adjlist(mode='in')
     all_MFRs = [[[target, net[target]]]]
 
+    #keeps track of nodes with no predecessors that are not the source
+    redundant = []
+    v = 0
+    while v < len(graph.vs()):
+        if not graph.predecessors(v):
+            if not v == source:
+                redundant.append(v)
+        v += 1
+    print(redundant)
+
     # while some partial MFRs remain
     while pointer < num:
+
         flag = False
         c_MFR = all_MFRs[pointer]
         c_tag = tags[pointer]
@@ -56,17 +70,21 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
             c_node = c_MFR[c_tag][0]
             # c_preds is a list of integers
             c_preds = c_MFR[c_tag][1]
+            for ele in redundant:
+                if ele in c_preds:
+                    c_preds.remove(ele)
 
             # if no predecessors remain
             # python uses implicit booleans for lists
             if not c_preds:
                 if c_tag == len(c_MFR) - 1:
                     flag = True
+                    #if not source in [row[0] for row in c_MFR]:
+                        #cycles.append(c_MFR)
                 else:
                     c_tag = c_tag + 1
 
             else:
-                # attempt to emulate expanded graph functionality
                 # if not c_node in graph.composite_nodes:
                 if not graph.vs[c_node]["composite"]:
                     m = len(c_preds)
@@ -160,9 +178,15 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
             id = []
             for chunk in mfr:
                 id.append(graph.get_eid(chunk[0], chunk[1]))
+                id.sort()
             ids.append(id)
         if verbose:
             for id in ids:
                 print(ind, ":", id, "\n")
                 ind += 1
         return [ids, len(ids)]
+
+g = Graph.Read_GraphML("bordetellaeGraph.xml")
+g.vs["name"] = g.vs["id"]
+
+get_mfrs(g, 0, 14, 1, "el")
