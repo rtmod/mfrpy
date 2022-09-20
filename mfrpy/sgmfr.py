@@ -3,8 +3,7 @@ Bottom-up algorithm for finding minimal functional routes (MFRs)
 """
 
 from igraph import *
-import update_expand
-import examplegraphs.igraph_graph
+from mfrpy import update_expand
 
 def get_mfrs(graph, source, target, verbose = False, mode = "es"):
     """
@@ -57,8 +56,9 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
             if not v == source:
                 redundant.append(v)
         v += 1
-    print(redundant)
 
+    if verbose:
+        print("nodes with no predecessors (other than source):", redundant)
     # while some partial MFRs remain
     while pointer < num:
 
@@ -66,6 +66,8 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
         c_MFR = all_MFRs[pointer]
         c_tag = tags[pointer]
         # while the current MFR is incomplete
+        if verbose:
+            print("current MFR:", all_MFRs[pointer])
         while not flag:
             c_node = c_MFR[c_tag][0]
             # c_preds is a list of integers
@@ -73,7 +75,8 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
             for ele in redundant:
                 if ele in c_preds:
                     c_preds.remove(ele)
-
+            if verbose:
+                print("node and predecessors:", c_node, c_preds)
             # if no predecessors remain
             # python uses implicit booleans for lists
             if not c_preds:
@@ -81,6 +84,8 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
                     flag = True
                     #if not source in [row[0] for row in c_MFR]:
                         #cycles.append(c_MFR)
+                    if verbose:
+                        print("MFR finished")
                 else:
                     c_tag = c_tag + 1
 
@@ -108,9 +113,13 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
 
                 # checks that all c_preds are in c_MFR
                 if not set(c_preds).difference(set(stems)):
+                    if verbose:
+                        print("all predecessors are in current MFR")
                     # same as line 35
                     if c_tag == len(c_MFR) - 1:
                         flag = True
+                        if verbose:
+                            print("MFR finished")
                     else:
                         c_tag = c_tag + 1
                 # appends new rows to current partial MFR
@@ -119,6 +128,8 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
                         temp2 = net[v]
                         c_MFR.append([v, temp2])
                     c_tag = c_tag + 1
+                    if verbose:
+                        print("new partial MFR:", c_MFR)
 
         pointer = pointer + 1
 
@@ -127,6 +138,8 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
         # checks for cycles and adds 'extraneous' MFRs to 'cycles' list
         if not [] in stalks:
             cycles.append(c_MFR)
+        if verbose:
+            print("cycles:", cycles)
 
     # removes "extra" MFRs, those that result from cycles in graph
     final_MFRs = []
@@ -185,8 +198,3 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
                 print(ind, ":", id, "\n")
                 ind += 1
         return [ids, len(ids)]
-
-g = Graph.Read_GraphML("bordetellaeGraph.xml")
-g.vs["name"] = g.vs["id"]
-
-get_mfrs(g, 0, 14, 1, "el")

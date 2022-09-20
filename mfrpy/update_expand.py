@@ -187,9 +187,8 @@ def expand(graph, table, verbose = 0):
 
     if verbose:
         print(exp_graph)
-        layout = exp_graph.layout("lgl")
         plot(exp_graph, vertex_size = 30,
-        edge_arrow_size = 0.75, vertex_color = "white", bbox=(0, 0, 500, 500))
+        edge_arrow_size = 0.75, vertex_color = "white", bbox=(0, 0, 300, 300))
     return exp_graph
 
 #g = Graph.Read_GraphML("bordetellaeGraph.xml")
