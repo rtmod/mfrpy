@@ -2,7 +2,7 @@
 Bottom-up algorithm for finding minimal functional routes (MFRs)
 """
 
-from igraph import *
+from igraph import Graph
 from mfrpy import update_expand
 
 def get_mfrs(graph, source, target, verbose = False, mode = "es"):
@@ -44,7 +44,7 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
     # the current MFR
     tags = [0]
     flag = False
-    cycles = []
+    discard = []
     net = graph.get_adjlist(mode='in')
     all_MFRs = [[[target, net[target]]]]
 
@@ -59,6 +59,7 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
 
     if verbose:
         print("nodes with no predecessors (other than source):", redundant)
+        print("composite list:", graph.vs["composite"])
     # while some partial MFRs remain
     while pointer < num:
 
@@ -80,10 +81,12 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
             # if no predecessors remain
             # python uses implicit booleans for lists
             if not c_preds:
+                if verbose:
+                    print("node", c_node, "has no predecessors")
                 if c_tag == len(c_MFR) - 1:
                     flag = True
                     #if not source in [row[0] for row in c_MFR]:
-                        #cycles.append(c_MFR)
+                        #discard.append(c_MFR)
                     if verbose:
                         print("MFR finished")
                 else:
@@ -108,6 +111,7 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
                     num = num + m - 1
                     c_preds = [c_MFR[c_tag][1]]
 
+
                 # list of entries in MFR's first "column"
                 stems = [row[0] for row in c_MFR]
 
@@ -122,11 +126,21 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
                             print("MFR finished")
                     else:
                         c_tag = c_tag + 1
+
                 # appends new rows to current partial MFR
                 else:
                     for v in c_preds:
                         temp2 = net[v]
-                        c_MFR.append([v, temp2])
+                        if verbose:
+                            print("preds of preds:", temp2)
+                        if set(temp2).intersection(set(redundant)):
+                            if graph.vs[v]["composite"]:
+                                if verbose:
+                                    print("ERROR: node can't be activated")
+                                discard.append(c_MFR)
+                                flag = True
+                        else:
+                            c_MFR.append([v, temp2])
                     c_tag = c_tag + 1
                     if verbose:
                         print("new partial MFR:", c_MFR)
@@ -135,16 +149,17 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
 
         # list of entries in MFRs second 'column'
         stalks = [row[1] for row in c_MFR]
-        # checks for cycles and adds 'extraneous' MFRs to 'cycles' list
+        # checks for discard and adds 'extraneous' MFRs to 'discard' list
         if not [] in stalks:
-            cycles.append(c_MFR)
+            discard.append(c_MFR)
         if verbose:
-            print("cycles:", cycles)
+            print("discard:", discard)
 
-    # removes "extra" MFRs, those that result from cycles in graph
+    # removes "extra" MFRs, those that result from discard in graph and non-
+    # activated nodes
     final_MFRs = []
     for mfr in all_MFRs:
-        if not mfr in cycles:
+        if not mfr in discard:
             final_MFRs.append(mfr)
 
     for mfr in final_MFRs:
@@ -152,7 +167,6 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
         for item in mfr:
             if item == [0,[]]:
                 mfr.remove(item)
-        # 'mode' argument is for how user wants mfrs to be displayed
         # reverses order of everything (since alg is bottom-up)
         mfr.reverse()
         for item in mfr:
@@ -164,10 +178,31 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
                     mfr.insert(mfr.index(item) + 1, [i, item[1]])
                 mfr.remove(item)
 
+    # translates expanded vertices to original
+    #contracted_MFRs = []
+    #for mfr in final_MFRs:
+        #new_mfr = []
+        #if verbose:
+            #print("old mfr:", mfr)
+        #for edge in mfr:
+            #if '~' in (graph.vs[edge[0]]["name"] or graph.vs[edge[1]]["name"]):
+                #print("inhibitory edge:", edge)
+            #if graph.vs[edge[0]]["composite"]:
+                #for e in mfr:
+                    #if e[1] == edge[0]:
+                    #    new_mfr.append([e[0], edge[1]])
+            #elif graph.vs[edge[1]]["composite"]:
+            #    pass
+            #else:
+            #    new_mfr.append(edge)
+        #contracted_MFRs.append(new_mfr)
+        #if verbose:
+            #print("new mfr:", new_mfr)
+
     # output options
     if verbose:
         print("Number of MFRs:", len(final_MFRs), "\n")
-        print("Final MFRs:")
+
     if mode == "em": # "em" = edge matrix
         ind = 1
         for mfr in final_MFRs:

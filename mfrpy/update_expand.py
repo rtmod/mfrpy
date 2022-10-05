@@ -172,26 +172,22 @@ def expand(graph, table, verbose = 0):
     exp_graph.add_vertices(len(names))
     exp_graph.add_edges(edgelist)
     #removes singleton nodes
-    isolated = []
-    for node in names:
-        if exp_graph.neighbors(names.index(node)) == []:
-            isolated.append(names.index(node))
-    exp_graph.delete_vertices(isolated)
-    for index in isolated:
-        names.remove(names[index])
+    #isolated = []
+    #for node in names:
+        #if exp_graph.neighbors(names.index(node)) == []:
+            #isolated.append(names.index(node))
+    #exp_graph.delete_vertices(isolated)
+    #for index in isolated:
+        #names.remove(names[index])
     exp_graph.vs["name"] = names
-    exp_graph.vs["label"] = exp_graph.vs["name"]
+    exp_graph.vs["label"] = names
+    #[ind for ind, val in enumerate(exp_graph.vs["name"])]
     exp_graph.vs["composite"] = [0 * graph.vcount()]
     for i in range((len(names)-compcount), len(names)):
         exp_graph.vs[i]["composite"] = 1
 
     if verbose:
         print(exp_graph)
-        #plot(exp_graph, vertex_size = 30,
-        #edge_arrow_size = 0.75, vertex_color = "white", bbox=(0, 0, 600, 600))
+        plot(exp_graph, vertex_size = 30,
+        edge_arrow_size = 0.75, vertex_color = "white", bbox=(0, 0, 600, 600))
     return exp_graph
-
-#g = Graph.Read_GraphML("bordetellaeGraph.xml")
-#g.vs["name"] = g.vs["id"]
-#tab = updates(g, g.es["synergy"], g.es["inhibition"], 1)
-#expand(g, tab, 1)
