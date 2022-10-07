@@ -1,5 +1,5 @@
 LICENSE.txt
-README.txt
+README.md
 setup.py
 mfrpy.egg-info/PKG-INFO
 mfrpy.egg-info/SOURCES.txt

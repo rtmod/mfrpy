@@ -185,9 +185,15 @@ def expand(graph, table, verbose = 0):
     exp_graph.vs["composite"] = [0 * graph.vcount()]
     for i in range((len(names)-compcount), len(names)):
         exp_graph.vs[i]["composite"] = 1
+    nicergraph = exp_graph
+    isolated = []
+    for node in names:
+        if exp_graph.neighbors(names.index(node)) == []:
+            isolated.append(names.index(node))
+    nicergraph.delete_vertices(isolated)
 
     if verbose:
         print(exp_graph)
-        plot(exp_graph, vertex_size = 30,
+        plot(nicergraph, vertex_size = 30,
         edge_arrow_size = 0.75, vertex_color = "white", bbox=(0, 0, 600, 600))
     return exp_graph

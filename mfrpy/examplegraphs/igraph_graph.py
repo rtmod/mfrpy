@@ -63,3 +63,16 @@ inhib.vs["name"] = ["i", "a", "b", "c", "d", "o"]
 inhib.es["synergy"] = [0, 0, 0, 1, 1, 0, 0]
 inhib.es["inhibition"] = [0, 0, 1, 1, 1, 1, 0]
 # edges (0,3), (1,3), (2,3) & (3,4) are inhibitory edges
+
+# example for testing redundancy in sgmfr i.e. nodes that cannot be activated
+impossible = Graph(directed = True)
+impossible.add_vertices(5)
+impossible.add_edges([(0,2), (1,2), (2,4), (3,4)])
+impossible.vs["name"] = ["A", "B", "C", "D", "E"]
+impossible.es["synergy"] = [1, 1, 2, 2]
+impossible.es["inhibition"] = [0, 1, 1, 0]
+
+# Bordetellae immune response graph from Thakar et al
+bordetellae = Graph.Read_GraphML("bordetellaeGraph.xml")
+bordetellae.vs["name"] = bordetellae.vs["id"]
+bordetellae.vs["label"] = bordetellae.vs["name"]

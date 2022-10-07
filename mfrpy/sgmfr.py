@@ -4,6 +4,7 @@ Bottom-up algorithm for finding minimal functional routes (MFRs)
 
 from igraph import Graph
 from mfrpy import update_expand
+from sympy.logic.boolalg import to_dnf
 
 def get_mfrs(graph, source, target, verbose = False, mode = "es"):
     """
@@ -27,6 +28,7 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
 
     """
 
+    oggraph = graph
     synergistic = []
     if 'synergy' in graph.es.attributes():
         synergistic = graph.es["synergy"]
@@ -60,22 +62,19 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
     if verbose:
         print("nodes with no predecessors (other than source):", redundant)
         print("composite list:", graph.vs["composite"])
+
     # while some partial MFRs remain
     while pointer < num:
-
         flag = False
         c_MFR = all_MFRs[pointer]
         c_tag = tags[pointer]
-        # while the current MFR is incomplete
         if verbose:
             print("current MFR:", all_MFRs[pointer])
+        # while the current MFR is incomplete
         while not flag:
             c_node = c_MFR[c_tag][0]
             # c_preds is a list of integers
             c_preds = c_MFR[c_tag][1]
-            for ele in redundant:
-                if ele in c_preds:
-                    c_preds.remove(ele)
             if verbose:
                 print("node and predecessors:", c_node, c_preds)
             # if no predecessors remain
@@ -85,15 +84,13 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
                     print("node", c_node, "has no predecessors")
                 if c_tag == len(c_MFR) - 1:
                     flag = True
-                    #if not source in [row[0] for row in c_MFR]:
-                        #discard.append(c_MFR)
                     if verbose:
                         print("MFR finished")
                 else:
                     c_tag = c_tag + 1
 
             else:
-                # if not c_node in graph.composite_nodes:
+                # if current node is not composite
                 if not graph.vs[c_node]["composite"]:
                     m = len(c_preds)
                     c_MFR[c_tag][1] = c_preds[0]
@@ -111,7 +108,6 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
                     num = num + m - 1
                     c_preds = [c_MFR[c_tag][1]]
 
-
                 # list of entries in MFR's first "column"
                 stems = [row[0] for row in c_MFR]
 
@@ -119,7 +115,6 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
                 if not set(c_preds).difference(set(stems)):
                     if verbose:
                         print("all predecessors are in current MFR")
-                    # same as line 35
                     if c_tag == len(c_MFR) - 1:
                         flag = True
                         if verbose:
@@ -179,26 +174,39 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
                 mfr.remove(item)
 
     # translates expanded vertices to original
-    #contracted_MFRs = []
-    #for mfr in final_MFRs:
-        #new_mfr = []
-        #if verbose:
-            #print("old mfr:", mfr)
-        #for edge in mfr:
-            #if '~' in (graph.vs[edge[0]]["name"] or graph.vs[edge[1]]["name"]):
-                #print("inhibitory edge:", edge)
-            #if graph.vs[edge[0]]["composite"]:
-                #for e in mfr:
-                    #if e[1] == edge[0]:
-                    #    new_mfr.append([e[0], edge[1]])
-            #elif graph.vs[edge[1]]["composite"]:
-            #    pass
-            #else:
-            #    new_mfr.append(edge)
-        #contracted_MFRs.append(new_mfr)
-        #if verbose:
-            #print("new mfr:", new_mfr)
+    contracted_MFRs = []
+    for mfr in final_MFRs:
+        new_mfr = []
+        if verbose:
+            print("old mfr:", mfr)
+        for edge in mfr:
+            # contracts composite edges by deleting composite nodes
+            if graph.vs[edge[0]]["composite"]:
+                for e in mfr:
+                    if e[1] == edge[0]:
+                        new_mfr.append([e[0], edge[1]])
+            elif graph.vs[edge[1]]["composite"]:
+                pass
+            else:
+                new_mfr.append(edge)
+        # changes inhibitory nodes back to originals
+        for edge in new_mfr:
+            if '~' in graph.vs[edge[0]]["name"]:
+                dict = {edge[0]:graph.vs["name"].index("{}".format(to_dnf(
+                "~{}".format(graph.vs[edge[0]]["name"]))))}
+                edge[0]=dict[edge[0]]
+            elif '~' in graph.vs[edge[1]]["name"]:
+                dict = {edge[1]:graph.vs["name"].index("{}".format(to_dnf(
+                "~{}".format(graph.vs[edge[1]]["name"]))))}
+                edge[1]=dict[edge[1]]
+        contracted_MFRs.append(new_mfr)
+        if verbose:
+            print("new mfr:", new_mfr)
+    if verbose:
+        for mfr in contracted_MFRs:
+            print(mfr)
 
+    final_MFRs = contracted_MFRs
     # output options
     if verbose:
         print("Number of MFRs:", len(final_MFRs), "\n")
@@ -225,7 +233,7 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
         for mfr in final_MFRs:
             id = []
             for chunk in mfr:
-                id.append(graph.get_eid(chunk[0], chunk[1]))
+                id.append(oggraph.get_eid(chunk[0], chunk[1]))
                 id.sort()
             ids.append(id)
         if verbose:
