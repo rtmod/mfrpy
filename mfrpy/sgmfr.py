@@ -131,7 +131,7 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
                         if set(temp2).intersection(set(redundant)):
                             if graph.vs[v]["composite"]:
                                 if verbose:
-                                    print("ERROR: node can't be activated")
+                                    print("node can't be activated")
                                 discard.append(c_MFR)
                                 flag = True
                         else:
