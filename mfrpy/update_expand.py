@@ -197,3 +197,42 @@ def expand(graph, table, verbose = 0):
         plot(nicergraph, vertex_size = 30,
         edge_arrow_size = 0.75, vertex_color = "white", bbox=(0, 0, 600, 600))
     return exp_graph
+
+
+def involution(array):
+    """
+    returns the involution of an array -
+    returns the original array if composed with itself
+    resolves issue with multiple edges in STNs
+
+    Parameters:
+    array -- a list of edge lists and synergy values, in any order
+
+    """
+    # initializing dictionary, separating array
+    involved = {}
+    unique = array[0]
+    lists = array[1]
+    shuffle = []
+
+    #making pairs of data from array
+    for sub in lists:
+        for thing in sub:
+            shuffle.append([thing, unique[lists.index(sub)]])
+
+    keys = list(set([pair[0] for pair in shuffle]))
+    couples = [pair[1] for pair in shuffle]
+
+    #rearranging and recombining pairs
+    for key in keys:
+        value = []
+        for pair in shuffle:
+            if key == pair[0]:
+                value.append(couples[shuffle.index(pair)])
+        involved[key] = list(set(value))
+        
+    new_array = [list(involved.keys()), list(involved.values())]
+
+    return new_array
+
+#toy = [[(0,3),(1,3),(2,3),(3,4)],[[1],[1,2],[2],[3]]]
