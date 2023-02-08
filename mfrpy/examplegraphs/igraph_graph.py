@@ -56,7 +56,7 @@ exp_dcg.vs["name"] = [
     "i", "a", "b", "c", "d",
     "e", "f", "o", "c1", "c2"
     ]
-exp_dag.vs["composite"] = [0, 0, 0, 0, 0, 0, 0, 0, 1, 1]
+exp_dcg.vs["composite"] = [0, 0, 0, 0, 0, 0, 0, 0, 1, 1]
 # exp_dcg.composite_nodes = [8, 9]
 # nodes 8 and 9 are composite nodes
 

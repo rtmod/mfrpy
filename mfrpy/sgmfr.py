@@ -3,7 +3,7 @@ Bottom-up algorithm for finding minimal functional routes (MFRs)
 """
 
 from igraph import Graph
-from mfrpy import update_expand
+import update_expand
 from sympy.logic.boolalg import to_dnf
 
 def get_mfrs(graph, source, target, verbose = False, mode = "es"):

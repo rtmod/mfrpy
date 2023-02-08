@@ -41,10 +41,12 @@ def prime(graph):
         for syn in synergy:
             if num == syn:
                 dependentedges.append(
-                graph.get_edgelist()[synergy.index(syn) + adder]
-                )
-                adder += 1
+                graph.get_edgelist()[
+                (([0] * adder) + synergy[adder:]).index(syn)
+                ])
+                adder = (([0] * adder) + synergy[adder:]).index(syn) + 1
         tochange[1].append(dependentedges)
+
     changeto = involution(tochange)
 
     # Creates new edgelist array with edge and synergy lists
@@ -61,7 +63,7 @@ def prime(graph):
     #    table.append([i, graph.vs[edge[0]]["name"]+'\u2192'+
     #    graph.vs[edge[1]]["name"],
     #    int(edgelist[1][i]),
-    #    bool(1)])
+    #    bool(0)])
     #    i+=1
     #print(tabulate(table, headers='firstrow', tablefmt = "github"))
 
@@ -234,8 +236,8 @@ def expand(graph, table, verbose = 0):
 
     if verbose:
         print(exp_graph)
-        plot(exp_graph, vertex_size = 30,
-        edge_arrow_size = 0.75, vertex_color = "white", bbox=(0, 0, 600, 600))
+        #plot(exp_graph, vertex_size = 30,
+        #edge_arrow_size = 0.75, vertex_color = "white", bbox=(0, 0, 600, 600))
 
     return exp_graph
 
@@ -274,3 +276,26 @@ def involution(array):
     new_array = [list(involved.keys()), list(involved.values())]
 
     return new_array
+
+dcg = Graph(directed = True) # directed cyclic graph, no composite nodes
+dcg.add_vertices(8)
+dcg.add_edges([
+    (0,1), (0,2), (0,3), (3,4),
+    (4,2), (2,5), (1,5), (5,4),
+    (4,6), (6,5), (5,7), (6,7)
+    ])
+dcg.vs["name"] = ["i", "a", "b", "c", "d", "e", "f", "o"]
+dcg.es["synergy"] = [0, 1, 0, 0, 1, 2, 2, 0, 0, 0, 0, 0]
+
+manysyns = Graph(directed = True)
+manysyns.add_vertices(5)
+manysyns.add_edges([
+    (0,1), (0,2), (0,3), (1,4),
+    (2,4), (2,4), (3,4)
+    ])
+manysyns.vs["name"] = ["a", "b", "c", "d", "e"]
+manysyns.es["synergy"] = [0, 0, 0, 1, 1, 2, 2]
+
+tab = updates(dcg, dcg.es["synergy"])
+
+expand(dcg, tab)
