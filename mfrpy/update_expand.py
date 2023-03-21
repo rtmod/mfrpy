@@ -15,12 +15,12 @@ def prime(graph):
 
     # Initializes lists
     inhibs = []
-    try:
-        for ind, val in enumerate(graph.es["inhibition"]):
-            if val:
-                inhibs.append(graph.get_edgelist()[ind])
-    except KeyError:
-        pass
+    #try:
+    #    for ind, val in enumerate(graph.es["inhibition"]):
+    #        if val:
+    #            inhibs.append(graph.get_edgelist()[ind])
+    #except KeyError:
+    #    pass
     try:
         synergy = graph.es["synergy"]
     except KeyError:

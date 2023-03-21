@@ -9,6 +9,9 @@ License: LICENSE.txt
 Platform: UNKNOWN
 License-File: LICENSE.txt
 
+# Introduction
+mfrpy is a Python package for finding the minimal functional routes of signal transduction networks. The package builds on work done at Pennsylvania State University by RÃ©ka Albert, Rui-Sheng Wang, and others. This is part of the *rtmod* pipeline for calculating the modulus of a family of routes.  This is done in two parts - first, the graph is expanded by the *update_expand.py* method. Our approach sees expansion mediated by an update table, simplifying computations in lieu of graph-theoretic expansion "by hand". For users interested in expansion, see [1]. Secondly, the minimal functional routes, minimal subgraphs of the expanded graph, are found using *sgmfr.py*, an algorithm adopted into Python from [2]. After computation, the minimal routes are returned in terms of original graph vertices and edges to the user. The following is meant to be an introduction to the package for novel users. For a more thorough explanation, refer to *rtmod tutorial.ipynb*. For more information on signal transduction networks in general, see [3].
+
 # mfrpy: Package Initialization
 
 ### Import the module:
@@ -37,6 +40,12 @@ cyclic example
 cyclic = igraph_graph.dcg
 ```
 
+user can also import their own graphs by standard igraph commands. For GraphML files
+
+```py
+myGraph = Graph.Read_GraphML("myGraph.xml")
+myGraph.vs["name"] = myGraph.vs["id"]
+```
 
 ## Finding the Minimal Functional Routes:
 
@@ -82,7 +91,7 @@ Supported output options:
 "es" -- returns edge sequence indices
 ```
 
-# Encoding your graph's dependent edges
+## Encoding your graph's dependent edges
 
 ### Add the synergy attribute to the edge sequence of your igraph Graph object:
 
@@ -99,7 +108,22 @@ However, edges 4 and 10, for example, are independent.
 
 Edges with the same value for the synergy attribute are dependent on one another
 
+To do the same for **inhibition**, 
 
+```py
+acyclic.es["inhibition"] = [0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+```
+
+Where 1 indicates an inhibitory edge while 0 indicates activation
+
+
+## References
+
+[1] Wang and Albert: **Elementary signaling modes predict the essentiality of signal transduction network components.** *BMC Systems Biology* 2011 **5**:44
+
+[2] Wang et al.: **Minimal functional routes in directed graphs with dependent edges**. *International Transactions in Operational Research* 2013
+
+[3] Albert and Robeva:Â **Signaling Networks : Asynchronous Boolean Models**. *Algebraic and Discrete Mathematical Methods for Modern Biology.* Elsevier, 2015. pp. 65-91
 
 
 

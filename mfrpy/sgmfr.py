@@ -3,7 +3,7 @@ Bottom-up algorithm for finding minimal functional routes (MFRs)
 """
 
 from igraph import Graph
-import update_expand
+from mfrpy import update_expand
 from sympy.logic.boolalg import to_dnf
 
 def get_mfrs(graph, source, target, verbose = False, mode = "es"):
@@ -64,7 +64,7 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
         v += 1
 
     if verbose:
-        print("nodes with no predecessors (other than source):", redundant)
+        print("nodes with no predecessors (other than source):", redundant, graph.vs[redundant]["name"])
 
     # Main loop, while some partial MFRs remain unfinished
     while pointer < num:
@@ -273,3 +273,6 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
                 ind += 1
 
         return [ids, len(ids)]
+#g = Graph.Read_GraphML("../data/bordetellaeGraph.xml")
+#g.vs["name"] = g.vs["id"]
+#get_mfrs(g, 0, 14, 1, "es")

@@ -1,4 +1,4 @@
-from setuptools import setup
+from distutils.core import setup
 
 setup(
     name='mfrpy',
@@ -11,6 +11,7 @@ setup(
     description='Computations of minimal functional routes',
     long_description=open('README.md').read(),
     install_requires=[
-        "python-igraph"
+        "python-igraph",
+        "sympy"
     ],
 )

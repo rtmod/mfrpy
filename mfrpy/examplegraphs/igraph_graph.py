@@ -1,4 +1,4 @@
-from igraph import Graph
+from igraph import Graph, plot
 
 # example graphs from Wang et al. 2013
 dag = Graph(directed = True) # directed acyclic graph, no composite nodes
@@ -93,7 +93,7 @@ impossible.es["synergy"] = [1, 1, 2, 2]
 impossible.es["inhibition"] = [0, 1, 1, 0]
 
 # Bordetellae immune response graph from Thakar et al
-bordetellae = Graph.Read_GraphML("bordetellaeGraph.xml")
+bordetellae = Graph.Read_GraphML("data/bordetellaeGraph.xml")
 bordetellae.vs["name"] = bordetellae.vs["id"]
 bordetellae.vs["label"] = bordetellae.vs["name"]
 
@@ -106,3 +106,23 @@ manysyns.add_edges([
     ])
 manysyns.vs["name"] = ["a", "b", "c", "d", "e"]
 manysyns.es["synergy"] = [0, 0, 0, 1, 1, 2, 2]
+
+
+alchemy = Graph(directed = True)
+alchemy.add_vertices(7)
+alchemy.add_edges([
+    (0,1), (0,2), (1,3), (2,3),
+    (1,4), (3,4), (3,5), (3,6), (4,6), (5,6),
+    ])
+alchemy.vs["name"] = [
+    "i", "a", "b", "c", "d", "e",
+     "o"
+    ]
+alchemy.es["synergy"] = [0, 0, 1, 1, 2, 2, 0, 0, 0]
+alchemy.es["inhibition"] = [0, 0, 0, 1, 0, 0, 0, 0, 0]
+alchemy.vs["label"] = alchemy.vs["name"]
+
+alchemy.es.select(2, 3)["color"] = "red"
+alchemy.es.select(8, 9)["color"] = "blue"
+#plot(alchemy, vertex_label_size = 8, vertex_size = (50), edge_arrow_size = 0.5, vertex_frame_color="white",
+     #vertex_color = "white", bbox=(0, 0, 400, 400))
