@@ -41,13 +41,13 @@ myGraph.vs["name"] = myGraph.vs["id"]
 Call the get_mfrs() method:
 
 ```py
-sgmfr.get_mfrs(acyclic, 0, 9, True, "el")
+sgmfr.get_mfrs(acyclic, [0], 9, True, "el")
 ```
 
 or
 
 ```py
-sgmfr.get_mfrs(cyclic, 0, 7, True, "el")
+sgmfr.get_mfrs(cyclic, [0], 7, True, "el")
 ```
 
 
@@ -58,7 +58,7 @@ get_mfrs(
 
 graph -- *igraph* Graph object, 
 
-source node index -- int, 
+source node indices -- list, 
 
 target node index -- int, 
 
