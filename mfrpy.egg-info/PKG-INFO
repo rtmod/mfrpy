@@ -1,7 +1,7 @@
 Metadata-Version: 2.1
 Name: mfrpy
 Version: 0.1.0
-Summary: Computations of minimal functional routes
+Summary: Graph expansion and computations of minimal functional routes
 Home-page: UNKNOWN
 Author: Igor Sokolov and Cory Brunson
 Author-email: jason.brunson@medicine.ufl.edu

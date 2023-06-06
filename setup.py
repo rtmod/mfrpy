@@ -8,10 +8,10 @@ setup(
     scripts=[],
     url='',
     license='LICENSE.txt',
-    description='Computations of minimal functional routes',
+    description='Graph expansion and computations of minimal functional routes',
     long_description=open('README.md').read(),
     install_requires=[
         "python-igraph",
         "sympy"
-    ],
+    ]
 )

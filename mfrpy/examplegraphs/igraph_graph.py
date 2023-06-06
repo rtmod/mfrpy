@@ -126,3 +126,33 @@ alchemy.es.select(2, 3)["color"] = "red"
 alchemy.es.select(8, 9)["color"] = "blue"
 #plot(alchemy, vertex_label_size = 8, vertex_size = (50), edge_arrow_size = 0.5, vertex_frame_color="white",
      #vertex_color = "white", bbox=(0, 0, 400, 400))
+
+xiao_wnt5a = Graph(directed = True)
+xiao_wnt5a.add_vertices(7)
+xiao_wnt5a.add_edges([(1,2),(0,2), (1,2),(2,2), (0,2),(2,2), (4,3), (0,1), (3,1), (4,4),
+(2,4), (1,5), (4,6), (2,6)])
+xiao_wnt5a.vs["name"]=["x4","x6","x2","x3","x7","x1","x5"]
+xiao_wnt5a.es["synergy"] = [1,1,2,2,3,3,0,0,0,0,0,0,0,0]
+
+xiao_wnt5a_simple = Graph(directed = True)
+xiao_wnt5a_simple.add_vertices(6)
+xiao_wnt5a_simple.add_edges([(0,1),(0,2),(1,2),(0,2),(1,2),(2,4),(4,3),(3,1),(1,5)])
+xiao_wnt5a_simple.vs["name"]=["x4","x6","x2","x3","x7","x1"]
+xiao_wnt5a_simple.es["synergy"] = [0,0,0,1,1,0,0,0,0]
+
+xiao = Graph(directed = True)
+xiao.add_vertices(7)
+xiao.add_edges([(0,1),(0,2),(1,2),(0,2),(1,2),(2,4),(4,3),(3,1),(1,5),(2,6),(4,6)])
+xiao.vs["name"]=["x4","x6","x2","x3","x7","x1","x5"]
+xiao.es["synergy"] = [0,0,0,1,1,0,0,0,0,0,0]
+
+yeast = Graph(directed = True)
+yeast.add_vertices(10)
+yeast.add_edges([(4,1),(2,1), (2,1), (4,1), (8,2),(7,2),(5,2), (9,3),(8,3),(7,3),(5,3),(1,3),
+(7,4), (6,5),(4,5),(3,5), (6,5),(4,5),(2,5), (6,5),(2,5),(3,5), (6,5),(4,5),(2,5),(3,5),
+  (4,5),(2,5),(3,5), (0,6), (3,7), (6,8),(4,8),(3,8), (6,8),(4,8),(2,8), (6,8),(2,8),(3,8),
+  (4,8),(2,8),(3,8), (6,8),(4,8),(2,8),(3,8), (4,9), (2,9), (4,9),(2,9)])
+yeast.es["synergy"] = [1,1, 0, 0, 2,2,2, 3,3,3,3,3, 0, 4,4,4, 5,5,5, 6,6,6, 7,7,7,7, 8,8,8, 0, 0, 9,9,9, 10,10,10, 11,11,11, 12,12,12, 13,13,13,13, 0, 0, 14,14]
+yeast.vs["name"]=['Start', 'Cdc25', 'Cdc2_Cdc13', 'Cdc2_Cdc13_A', 'PP', 'Rum1', 'SK', 'Slp1', 'Ste9', 'Wee1_Mik1']
+yeast.vs["label"] = yeast.vs["name"]
+table = [['Start', 'Cdc25', 'Cdc2_Cdc13', 'Cdc2_Cdc13_A', 'PP', 'Rum1', 'SK', 'Slp1', 'Ste9', 'Wee1_Mik1'],['','(PP&Cdc2_Cdc13)|PP|Cdc2_Cdc13','(Ste9&Slp1&Rum1)','(Wee1_Mik1&Ste9&Slp1&Rum1&Cdc25)', 'Slp1', '(SK&PP&Cdc2_Cdc13_A)|(SK&PP&Cdc2_Cdc13)|(SK&Cdc2_Cdc13_A&Cdc2_Cdc13)|(SK&PP&Cdc2_Cdc13_A&Cdc2_Cdc13)|(PP&Cdc2_Cdc13_A&Cdc2_Cdc13)', 'Start', 'Cdc2_Cdc13_A', '(SK&PP&Cdc2_Cdc13_A)|(SK&PP&Cdc2_Cdc13)|(SK&Cdc2_Cdc13_A&Cdc2_Cdc13)|(PP&Cdc2_Cdc13_A&Cdc2_Cdc13)|(SK&PP&Cdc2_Cdc13_A&Cdc2_Cdc13)', 'PP|Cdc2_Cdc13|(PP&Cdc2_Cdc13)']]

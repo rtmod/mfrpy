@@ -16,7 +16,7 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
 
     Parameters:
     graph  -- *igraph* Graph object
-    source -- integer index of source node
+    source -- array of integer indices of source node
     target -- integer index of target node
     verbose -- option to diplay MFRs, defaults to False
     mode -- output option, defaults to "es"
@@ -59,7 +59,7 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
     v = 0
     while v < len(graph.vs()):
         if not graph.predecessors(v):
-            if not v == source:
+            if not v in source:
                 redundant.append(v)
         v += 1
 
@@ -77,6 +77,8 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
 
         # While the current MFR is unfinished
         while not flag:
+            if verbose:
+                print("current tag:", c_tag)
             c_node = c_MFR[c_tag][0]
             c_preds = c_MFR[c_tag][1]
 
