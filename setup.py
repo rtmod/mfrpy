@@ -13,5 +13,6 @@ setup(
     install_requires=[
         "python-igraph",
         "sympy"
-    ]
+    ],
+    py_modules=["mfrpy"]
 )
