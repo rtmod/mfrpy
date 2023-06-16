@@ -131,7 +131,7 @@ xiao_wnt5a = Graph(directed = True)
 xiao_wnt5a.add_vertices(7)
 xiao_wnt5a.add_edges([(1,2),(0,2), (1,2),(2,2), (0,2),(2,2), (4,3), (0,1), (3,1), (4,4),
 (2,4), (1,5), (4,6), (2,6)])
-xiao_wnt5a.vs["name"]=["x4","x6","x2","x3","x7","x1","x5"]
+xiao_wnt5a.vs["name"]=["RET1","HADHB","pirin","S100P","STC2","WNT5A","MART1"]
 xiao_wnt5a.es["synergy"] = [1,1,2,2,3,3,0,0,0,0,0,0,0,0]
 
 xiao_wnt5a_simple = Graph(directed = True)
