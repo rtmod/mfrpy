@@ -143,7 +143,7 @@ xiao_wnt5a_simple.es["synergy"] = [0,0,0,1,1,0,0,0,0]
 xiao = Graph(directed = True)
 xiao.add_vertices(7)
 xiao.add_edges([(0,1),(0,2),(1,2),(0,2),(1,2),(2,4),(4,3),(3,1),(1,5),(2,6),(4,6)])
-xiao.vs["name"]=["x4","x6","x2","x3","x7","x1","x5"]
+xiao.vs["name"]=["RET1","HADHB","pirin","S100P","STC2","WNT5A","MART1"]
 xiao.es["synergy"] = [0,0,0,1,1,0,0,0,0,0,0]
 
 yeast = Graph(directed = True)

@@ -276,26 +276,3 @@ def involution(array):
     new_array = [list(involved.keys()), list(involved.values())]
 
     return new_array
-
-dcg = Graph(directed = True) # directed cyclic graph, no composite nodes
-dcg.add_vertices(8)
-dcg.add_edges([
-    (0,1), (0,2), (0,3), (3,4),
-    (4,2), (2,5), (1,5), (5,4),
-    (4,6), (6,5), (5,7), (6,7)
-    ])
-dcg.vs["name"] = ["i", "a", "b", "c", "d", "e", "f", "o"]
-dcg.es["synergy"] = [0, 1, 0, 0, 1, 2, 2, 0, 0, 0, 0, 0]
-
-manysyns = Graph(directed = True)
-manysyns.add_vertices(5)
-manysyns.add_edges([
-    (0,1), (0,2), (0,3), (1,4),
-    (2,4), (2,4), (3,4)
-    ])
-manysyns.vs["name"] = ["a", "b", "c", "d", "e"]
-manysyns.es["synergy"] = [0, 0, 0, 1, 1, 2, 2]
-
-tab = updates(dcg, dcg.es["synergy"])
-
-expand(dcg, tab)

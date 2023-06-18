@@ -6,7 +6,7 @@ from igraph import Graph
 from mfrpy import update_expand
 from sympy.logic.boolalg import to_dnf
 
-def get_mfrs(graph, source, target, verbose = False, mode = "es"):
+def get_mfrs(graph, source, target, expanded = False, verbose = False, mode = "es"):
     """
     Given a graph, source node, and target node, returns the number of MFRs
     from source to target and all MFRs.
@@ -18,6 +18,7 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
     graph  -- *igraph* Graph object
     source -- array of integer indices of source node
     target -- integer index of target node
+    expanded -- if the input graph is already expanded
     verbose -- option to diplay MFRs, defaults to False
     mode -- output option, defaults to "es"
 
@@ -41,10 +42,11 @@ def get_mfrs(graph, source, target, verbose = False, mode = "es"):
         negatory = []
 
     # Expansion of graph to include composite and inhibitory nodes
-    graph = update_expand.expand(
-        graph,
-        update_expand.updates(graph, synergistic, negatory)
-        )
+    if not expanded:
+        graph = update_expand.expand(
+            graph,
+            update_expand.updates(graph, synergistic, negatory)
+            )
     # Initialization of variables for main loop
     pointer = 0
     num = 1
