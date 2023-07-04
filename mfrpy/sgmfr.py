@@ -196,44 +196,45 @@ def get_mfrs(graph, source, target, expanded = False, verbose = False, mode = "e
                 mfr.remove(item)
 
     # Translates expanded vertices to original
-    contracted_MFRs = []
-    for mfr in final_MFRs:
-        new_mfr = []
+    if not expanded:
+        contracted_MFRs = []
+        for mfr in final_MFRs:
+            new_mfr = []
 
-        if verbose:
-            print("old mfr:", mfr)
+            if verbose:
+                print("old mfr:", mfr)
 
-        for edge in mfr:
-            # Contracts composite edges by deleting composite nodes
-            if graph.vs[edge[0]]["composite"]:
-                for e in mfr:
-                    if e[1] == edge[0]:
-                        new_mfr.append([e[0], edge[1]])
-            elif graph.vs[edge[1]]["composite"]:
-                pass
-            else:
-                new_mfr.append(edge)
+            for edge in mfr:
+                # Contracts composite edges by deleting composite nodes
+                if graph.vs[edge[0]]["composite"]:
+                    for e in mfr:
+                        if e[1] == edge[0]:
+                            new_mfr.append([e[0], edge[1]])
+                elif graph.vs[edge[1]]["composite"]:
+                    pass
+                else:
+                    new_mfr.append(edge)
 
-        # Changes inhibitory nodes back to originals
-        for edge in new_mfr:
-            if '~' in graph.vs[edge[0]]["name"]:
-                dict = {edge[0]:graph.vs["name"].index(
-                "{}".format(to_dnf("~{}".format(
-                graph.vs[edge[0]]["name"]
-                ))))}
-                edge[0]=dict[edge[0]]
-            elif '~' in graph.vs[edge[1]]["name"]:
-                dict = {edge[1]:graph.vs["name"].index(
-                "{}".format(to_dnf("~{}".format(
-                graph.vs[edge[1]]["name"]
-                ))))}
-                edge[1]=dict[edge[1]]
-        contracted_MFRs.append(new_mfr)
+            # Changes inhibitory nodes back to originals
+            for edge in new_mfr:
+                if '~' in graph.vs[edge[0]]["name"]:
+                    dict = {edge[0]:graph.vs["name"].index(
+                    "{}".format(to_dnf("~{}".format(
+                    graph.vs[edge[0]]["name"]
+                    ))))}
+                    edge[0]=dict[edge[0]]
+                elif '~' in graph.vs[edge[1]]["name"]:
+                    dict = {edge[1]:graph.vs["name"].index(
+                    "{}".format(to_dnf("~{}".format(
+                    graph.vs[edge[1]]["name"]
+                    ))))}
+                    edge[1]=dict[edge[1]]
+            contracted_MFRs.append(new_mfr)
 
-        if verbose:
-            print("new mfr:", new_mfr)
+            if verbose:
+                print("new mfr:", new_mfr)
 
-    final_MFRs = contracted_MFRs
+        final_MFRs = contracted_MFRs
 
     if verbose:
         print("Number of MFRs:", len(final_MFRs))
@@ -277,6 +278,3 @@ def get_mfrs(graph, source, target, expanded = False, verbose = False, mode = "e
                 ind += 1
 
         return [ids, len(ids)]
-#g = Graph.Read_GraphML("../data/bordetellaeGraph.xml")
-#g.vs["name"] = g.vs["id"]
-#get_mfrs(g, 0, 14, 1, "es")

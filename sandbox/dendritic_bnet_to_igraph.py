@@ -1,6 +1,7 @@
-from igraph import Graph
-import update_expand
+from igraph import Graph, GraphBase
+from mfrpy import update_expand
 
+# bnet in list form
 list = ["AKT",           "(NCOR2&PIP3)",
 "ALOX15",        "(CREB&STAT3_b1&STAT6)",
 "AP1",           "(FOS&JUN)",
@@ -100,13 +101,47 @@ list = ["AKT",           "(NCOR2&PIP3)",
 
 names = list[::2]
 values = list[1::2]
-print(len(names))
 
-bord = Graph(directed = True)
-bord.add_vertices(len(names))
-bord.vs["name"] = names
-
+# creating the graph with vertices = # of nodes in table and no edges
+dend = Graph(directed = True)
+dend.add_vertices(len(names))
+dend.vs["name"] = names
+# edges filled in by expanding via update table
 table = [names,values]
 
+exp_dend = update_expand.expand(dend, table)
+# expansion is complete
 
-exp_bord = update_expand.expand(bord, table)
+# to obtain get back original graph, we remove composite nodes and replace
+# with synergy
+toadd = []
+for edge in exp_dend.get_edgelist():
+    if exp_dend.vs[edge[0]]["composite"]:
+
+        toadd.append((exp_dend.predecessors(edge[0]), edge[1]))
+
+# removes composite nodes
+v = 0
+toremove = []
+while v < len(exp_dend.vs()):
+    if exp_dend.vs[v]["composite"]:
+        toremove.append(exp_dend.vs[v]["name"])
+    v += 1
+exp_dend.delete_vertices(toremove)
+
+# adds synergy attribute to edges
+tosynergize = []
+for e in toadd:
+    for comp in e[0]:
+        tosynergize.append((comp,e[1]))
+        exp_dend.add_edges([(comp,e[1])])
+exp_dend.es["synergy"] = [0*len(exp_dend.es())]
+
+i=0
+ctr = 1
+edgelist = exp_dend.get_edgelist()
+while i<len(tosynergize):
+    if (tosynergize[i][1] != tosynergize[i-1][1])&(i!=0):
+        ctr +=1
+    exp_dend.es[edgelist.index(tosynergize[i])]["synergy"] =ctr
+    i+=1
