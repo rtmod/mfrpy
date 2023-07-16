@@ -10,7 +10,8 @@ here::here("sandbox/dendrite.bnet") |>
   mutate(across(c(target, source), ~ str_trim(.))) |> 
   mutate(source = str_split(source, pattern = " +\\| +")) |> 
   unnest(source) |> 
-  mutate(synergy = as.integer(fct_inorder(source))) |> 
+  # mutate(synergy = as.integer(fct_inorder(source))) |> 
+  mutate(synergy = row_number()) |> 
   mutate(source = str_split(source, pattern = "\\&")) |> 
   unnest(source) |> 
   mutate(sign = ifelse(str_detect(source, "^!"), -1L, 1L)) |> 
