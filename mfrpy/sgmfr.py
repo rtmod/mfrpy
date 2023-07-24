@@ -106,18 +106,21 @@ def get_mfrs(graph, source, target, expanded = False, verbose = False, mode = "e
             else:
                 # If current node is not composite
                 if not graph.vs[c_node]["composite"]:
+                    print("---MEM ALLOC---")
                     m = len(c_preds)
                     c_MFR[c_tag][1] = c_preds[0]
+                    print("chose", c_MFR[c_tag])
                     # Allots memory to new partial MFRs
                     i = 0
                     while i < m - 1:
                         # Creates a copy of the current MFR for each predecessor
                         temp1 = [li[:] for li in c_MFR]
                         temp1[c_tag][1] = [c_preds[i + 1]]
+                        print("alloted memory for", temp1[c_tag])
                         # Current MFR is replaced by first copy
                         all_MFRs.append(temp1)
                         tags.append(c_tag)
-                        i = i + 1
+                        i += 1
                     num = num + m - 1
                     c_preds = [c_MFR[c_tag][1]]
 
@@ -147,7 +150,7 @@ def get_mfrs(graph, source, target, expanded = False, verbose = False, mode = "e
                             print("preds of preds:", temp2)
 
                         # If the node cannot be activated we ignore this MFR
-                        if set(temp2).intersection(set(redundant)):
+                        if (set(temp2).issubset(set(redundant)) and len(set(temp2)) != 0):
                             if graph.vs[v]["composite"]:
                                 flag = True
 

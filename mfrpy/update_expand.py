@@ -15,12 +15,12 @@ def prime(graph):
 
     # Initializes lists
     inhibs = []
-    #try:
-    #    for ind, val in enumerate(graph.es["inhibition"]):
-    #        if val:
-    #            inhibs.append(graph.get_edgelist()[ind])
-    #except KeyError:
-    #    pass
+    try:
+        for ind, val in enumerate(graph.es["inhibition"]):
+            if val:
+                inhibs.append(graph.get_edgelist()[ind])
+    except KeyError:
+        pass
     try:
         synergy = graph.es["synergy"]
     except KeyError:
@@ -46,7 +46,6 @@ def prime(graph):
                 ])
                 adder = (([0] * adder) + synergy[adder:]).index(syn) + 1
         tochange[1].append(dependentedges)
-
     changeto = involution(tochange)
 
     # Creates new edgelist array with edge and synergy lists
@@ -56,16 +55,17 @@ def prime(graph):
             edgelist[0].append(e)
             edgelist[1].append(s)
 
-    #table = [["id", "link", "syn", "inhibition"]]
-    #i = 0
-    #while i < len(edgelist[0]):
-    #    edge = edgelist[0][i]
-    #    table.append([i, graph.vs[edge[0]]["name"]+'\u2192'+
-    #    graph.vs[edge[1]]["name"],
-    #    int(edgelist[1][i]),
-    #    bool(0)])
-    #    i+=1
-    #print(tabulate(table, headers='firstrow', tablefmt = "github"))
+    table = [["id", "link", "syn", "inhibition"]]
+    i = 0
+    while i < len(edgelist[0]):
+        edge = edgelist[0][i]
+        table.append([i, graph.vs[edge[0]]["name"]+'\u2192'+
+        graph.vs[edge[1]]["name"],
+        int(edgelist[1][i]),
+        bool(0)])
+        i+=1
+    if verbose:
+        print(tabulate(table, headers='firstrow', tablefmt = "github"))
 
     return [edgelist, inhibs]
 
@@ -107,8 +107,9 @@ def updates(graph, synergy = [], inhibition = [], verbose = 0):
         synergies.append(syn)
 
     # Synergy is checked first, then inhibition if applicable
+    predlist = []
     for group in synergies:
-        predlist = []
+        predlist.clear()
         for e in group:
             if e in inhibs:
                 negpred = '~{}'.format(graph.vs["name"][e[0]])
@@ -130,7 +131,7 @@ def updates(graph, synergy = [], inhibition = [], verbose = 0):
             updatetable[updatetable.index(entry)] = ""
         else:
             final_string = '{}'.format("|".join(entry))
-            updatetable[updatetable.index(entry)] = final_string
+            updatetable[updatetable.index(entry)] = final_string.replace("|()","")
 
     # Computes logical negations for inhibitory nodes
     logical_negations = [[], []]
@@ -225,7 +226,7 @@ def expand(graph, table, verbose = 0):
     exp_graph.vs["composite"] = [0 * graph.vcount()]
     for i in range((len(names)-compcount), len(names)):
         exp_graph.vs[i]["composite"] = 1
-
+    exp_graph.simplify(0,1)
     # Removes isolated nodes
     #nicergraph = exp_graph
     #isolated = []
