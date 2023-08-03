@@ -2,7 +2,7 @@ from igraph import Graph, plot
 from tabulate import tabulate
 from sympy.logic.boolalg import to_dnf
 
-def prime(graph):
+def prime(graph, verbose = False):
     """
     For a given graph, returns the edgelist with correct synergies as well as
     list of inhibitory edges. Necessary for graphs with multiple edges and
