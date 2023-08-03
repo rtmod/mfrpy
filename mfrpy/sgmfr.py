@@ -151,13 +151,13 @@ def get_mfrs(graph, source, target, expanded = False, verbose = False, mode = "e
 
                         # If the node cannot be activated we ignore this MFR
                         if (set(temp2).issubset(set(redundant)) and len(set(temp2)) != 0):
-                            if graph.vs[v]["composite"]:
-                                flag = True
+                        #if graph.vs[v]["composite"]:
+                            flag = True
 
-                                if verbose:
-                                    print("node can't be activated")
+                            #if verbose:
+                                #print("node can't be activated")
 
-                                discard.append(c_MFR)
+                            discard.append(c_MFR)
                         else:
                             c_MFR.append([v, temp2])
                     c_tag = c_tag + 1
