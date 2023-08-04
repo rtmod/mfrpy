@@ -96,7 +96,7 @@ def get_mfrs(graph, source, target, expanded = False, verbose = False, mode = "e
 
                 if c_tag == len(c_MFR) - 1:
                     flag = True
-
+                
                     if verbose:
                         print("MFR finished")
 
@@ -150,16 +150,17 @@ def get_mfrs(graph, source, target, expanded = False, verbose = False, mode = "e
                             print("preds of preds:", temp2)
 
                         # If the node cannot be activated we ignore this MFR
-                        if (set(temp2).issubset(set(redundant)) and len(set(temp2)) != 0):
-                        #if graph.vs[v]["composite"]:
-                            flag = True
+                        #if set(temp2).intersection(set(redundant)):
+                        #    if graph.vs[v]["composite"]:
+                        #        flag = True
 
-                            #if verbose:
-                                #print("node can't be activated")
+                        #        if verbose:
+                        #            print("node can't be activated")
 
-                            discard.append(c_MFR)
-                        else:
-                            c_MFR.append([v, temp2])
+                            #discard.append(c_MFR)
+
+                        #else:
+                        c_MFR.append([v, temp2])
                     c_tag = c_tag + 1
 
                     if verbose:
@@ -185,7 +186,7 @@ def get_mfrs(graph, source, target, expanded = False, verbose = False, mode = "e
     for mfr in final_MFRs:
         # Removes unecessary last row of MFR
         for item in mfr:
-            if item == [0,[]]:
+            if not item[1]:
                 mfr.remove(item)
         # Reverses order of lists (since algorithm is bottom-up)
         mfr.reverse()
