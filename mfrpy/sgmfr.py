@@ -106,17 +106,20 @@ def get_mfrs(graph, source, target, expanded = False, verbose = False, mode = "e
             else:
                 # If current node is not composite
                 if not graph.vs[c_node]["composite"]:
-                    print("---MEM ALLOC---")
+                    if verbose:
+                        print("---MEM ALLOC---")
                     m = len(c_preds)
                     c_MFR[c_tag][1] = c_preds[0]
-                    print("chose", c_MFR[c_tag])
+                    if verbose:
+                        print("chose", c_MFR[c_tag])
                     # Allots memory to new partial MFRs
                     i = 0
                     while i < m - 1:
                         # Creates a copy of the current MFR for each predecessor
                         temp1 = [li[:] for li in c_MFR]
                         temp1[c_tag][1] = [c_preds[i + 1]]
-                        print("alloted memory for", temp1[c_tag])
+                        if verbose:
+                            print("alloted memory for", temp1[c_tag])
                         # Current MFR is replaced by first copy
                         all_MFRs.append(temp1)
                         tags.append(c_tag)
