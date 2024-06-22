@@ -59,9 +59,12 @@ def get_mfrs(graph, source, target, expanded = False, verbose = False, mode = "e
     # redundant tracks nodes with no predecessors that are not the source
     redundant = []
     v = 0
+    source_list = source
+    if not isinstance(source_list, list):
+        source_list = [source_list]
     while v < len(graph.vs()):
         if not graph.predecessors(v):
-            if not v in source:
+            if not v in source_list:
                 redundant.append(v)
         v += 1
 
@@ -274,7 +277,18 @@ def get_mfrs(graph, source, target, expanded = False, verbose = False, mode = "e
         for mfr in final_MFRs:
             id = []
             for chunk in mfr:
-                id.append(oggraph.get_eid(chunk[0], chunk[1]))
+                if expanded:
+                    id.append(oggraph.get_eid(chunk[0], chunk[1]))
+                else:
+                    if not isinstance(chunk[0], list):
+                        chunk[0] = [chunk[0]]
+                    # TODO: Is a more elegant solution available?
+                    for chunk_0 in chunk[0]:
+                        chunk_s = graph.vs()[chunk_0]["name"]
+                        chunk_t = graph.vs()[chunk[1]]["name"]
+                        chunk_s = chunk_s.replace("~", "")
+                        chunk_t = chunk_t.replace("~", "")
+                        id.append(oggraph.get_eid(chunk_s, chunk_t))
                 id.sort()
             ids.append(id)
 
