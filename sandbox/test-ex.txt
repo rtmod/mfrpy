@@ -1,0 +1,34 @@
+from igraph import Graph, plot
+from mfrpy import update_expand
+from mfrpy import sgmfr
+
+g = Graph(directed = True)
+g.add_vertices(5)
+g.add_edges([(0,2), (1,2), (2,4), (3,4)])
+g.vs["name"] = ["A", "B", "C", "D", "E"]
+g.es["synergy"] = [1, 1, 2, 2]
+
+tb = update_expand.updates(g, g.es["synergy"], verbose = True)
+h = update_expand.expand(g, tb, 1)
+
+gmfr = sgmfr.get_mfrs(g, source = 0, target = 4, verbose = True, mode = "el")
+
+g.es["inhibition"] = [0, 1, 1, 0]
+
+tb = update_expand.updates(g, g.es["synergy"], g.es["inhibition"], verbose = True)
+h = update_expand.expand(g, tb, 1)
+
+gmfr = sgmfr.get_mfrs(g, source = 0, target = 4, verbose = True, mode = "el")
+
+from mfrpy import examplegraphs
+bordetellae = Graph.Read_GraphML("bordetellaeGraph.xml")
+bordetellae.vs["name"] = bordetellae.vs["id"]
+bordetellae.vs["label"] = bordetellae.vs["name"]
+
+bmfr = sgmfr.get_mfrs(bordetellae, source = 0, target = 14, mode = "es")
+bmfr = sgmfr.get_mfrs(bordetellae, source = "Bt", target = "PH", mode = "em")
+
+from pmodpy import modsubfamily
+
+bmfr_family = [[int(e in mfr) for e in range(len(bordetellae.es))] for mfr in bmfr[0]]
+modsubfamily.modulus_subfamily_density(bordetellae, bmfr_family, p=2)
