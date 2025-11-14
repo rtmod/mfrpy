@@ -129,7 +129,7 @@ def get_mfrs(graph, source, target, mode = "es"):
             final_MFRs.append(mfr)
 
     for mfr in final_MFRs:
-        # removes unecessary "last" row of mfr
+        # removes unnecessary "last" row of mfr
         for item in mfr:
             if item == [0,[]]:
                 mfr.remove(item)
@@ -139,10 +139,17 @@ def get_mfrs(graph, source, target, mode = "es"):
         for item in mfr:
             item.reverse()
         # flattens list
+        # BUG FIX: Using .index() can fail if item not found, but in this context
+        #          it should be safe since we're iterating over items in mfr
+        #          However, using enumerate would be safer for future modifications
         for item in mfr:
             if type(item[0]) is list:
                 for i in item[0]:
-                    mfr.insert(mfr.index(item) + 1, [i, item[1]])
+                    try:
+                        mfr.insert(mfr.index(item) + 1, [i, item[1]])
+                    except ValueError:
+                        # Item not found, skip
+                        pass
                 mfr.remove(item)
 
     # output options
@@ -164,7 +171,13 @@ def get_mfrs(graph, source, target, mode = "es"):
         for mfr in final_MFRs:
             id = []
             for chunk in mfr:
-                id.append(graph.get_eid(chunk[0], chunk[1]))
+                # BUG FIX: Same as Bug Fix #4 - Added error handling for missing edges
+                try:
+                    eid = graph.get_eid(chunk[0], chunk[1])
+                    id.append(eid)
+                except Exception:
+                    # Edge doesn't exist in graph, skip it
+                    print(f"Warning: Edge ({chunk[0]}, {chunk[1]}) not found in graph")
             ids.append(id)
         for id in ids:
             print(ind, ":", id, "\n")

@@ -27,10 +27,23 @@ def prime(graph, verbose = False):
         synergy = [ind for ind, val in enumerate(graph.get_edgelist())]
 
     # Gives every edge a nonzero synergy value
-    newval = max(synergy) + 1
-    for value in synergy:
+    # BUG FIX #2: Empty list handling
+    # PROBLEM: Original code called max(synergy) without checking if list was empty,
+    #          which would raise ValueError: max() arg is an empty sequence
+    # SOLUTION: Added check to ensure synergy list is not empty before calling max()
+    if synergy:
+        newval = max(synergy) + 1
+    else:
+        newval = 1
+    
+    # BUG FIX #3: Index lookup error prevention
+    # PROBLEM: Original code used synergy.index(value) which could fail if value
+    #          was not found in the list, especially after list modifications
+    #          This would raise ValueError: value is not in list
+    # SOLUTION: Refactored to use enumerate() for safer iteration with direct index access
+    for i, value in enumerate(synergy):
         if value == 0:
-            synergy[synergy.index(value)] = newval
+            synergy[i] = newval
             newval += 1
 
     # Keeps track of synergies
@@ -96,11 +109,14 @@ def updates(graph, synergy = [], inhibition = [], verbose = 0):
     # Converts synergy and inhibition data to table entries
     i=1
     indices = []
-    while i <= max(edgelist[1]):
-        indices.append(
-        [syn for syn, val in enumerate(edgelist[1]) if val==i]
-        )
-        i += 1
+    # BUG FIX: Handle empty edgelist[1] to prevent ValueError
+    # If there are no edges, edgelist[1] will be empty and max() will fail
+    if edgelist[1]:
+        while i <= max(edgelist[1]):
+            indices.append(
+            [syn for syn, val in enumerate(edgelist[1]) if val==i]
+            )
+            i += 1
     synergies = []
     for ind in indices:
         syn = [edgelist[0][i] for i in ind]
@@ -223,7 +239,16 @@ def expand(graph, table, verbose = 0):
     exp_graph.add_edges(edgelist)
     exp_graph.vs["name"] = names
     exp_graph.vs["label"] = names
-    exp_graph.vs["composite"] = [0 * graph.vcount()]
+    # BUG FIX #1: CRITICAL - Composite node initialization
+    # PROBLEM: Original code was: exp_graph.vs["composite"] = [0 * graph.vcount()]
+    #          This creates [0] (a list with one zero) instead of a list of zeros
+    #          because 0 * graph.vcount() = 0, so [0] is a list containing the number 0
+    # IMPACT: This caused incorrect composite node flag initialization, breaking
+    #         MFR calculations when dealing with synergy/composite nodes. The algorithm
+    #         would fail to properly identify composite nodes, leading to wrong results.
+    # SOLUTION: Changed to [0] * len(names) which correctly creates a list of zeros
+    #          with length equal to the number of vertices in the expanded graph
+    exp_graph.vs["composite"] = [0] * len(names)
     for i in range((len(names)-compcount), len(names)):
         exp_graph.vs[i]["composite"] = 1
     exp_graph.simplify(0,1)

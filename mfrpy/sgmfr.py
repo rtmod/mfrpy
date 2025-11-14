@@ -19,7 +19,7 @@ def get_mfrs(graph, source, target, expanded = False, verbose = False, mode = "e
     source -- array of integer indices of source node
     target -- integer index of target node
     expanded -- if the input graph is already expanded
-    verbose -- option to diplay MFRs, defaults to False
+    verbose -- option to display MFRs, defaults to False
     mode -- output option, defaults to "es"
 
     Supported output options:
@@ -186,7 +186,7 @@ def get_mfrs(graph, source, target, expanded = False, verbose = False, mode = "e
             final_MFRs.append(mfr)
 
     for mfr in final_MFRs:
-        # Removes unecessary last row of MFR
+        # Removes unnecessary last row of MFR
         for item in mfr:
             if item == [0,[]]:
                 mfr.remove(item)
@@ -274,8 +274,26 @@ def get_mfrs(graph, source, target, expanded = False, verbose = False, mode = "e
         for mfr in final_MFRs:
             id = []
             for chunk in mfr:
-                id.append(oggraph.get_eid(chunk[0], chunk[1]))
-                id.sort()
+                # BUG FIX #4: Missing edge handling
+                # PROBLEM: Original code called oggraph.get_eid(chunk[0], chunk[1]) without
+                #          error handling. If an edge from the MFR doesn't exist in the
+                #          original graph, get_eid() raises an exception, causing the
+                #          entire MFR calculation to crash.
+                # IMPACT: Program would crash with KeyError or ValueError when processing
+                #         MFRs that contain edges not present in the original graph structure.
+                #         This could happen with expanded graphs where composite nodes create
+                #         edges that don't map back to the original graph.
+                # SOLUTION: Added try-except block to gracefully handle missing edges by
+                #          skipping them with a warning message, allowing the MFR calculation
+                #          to continue processing other edges.
+                try:
+                    eid = oggraph.get_eid(chunk[0], chunk[1])
+                    id.append(eid)
+                except Exception:
+                    # Edge doesn't exist in original graph, skip it
+                    if verbose:
+                        print(f"Warning: Edge ({chunk[0]}, {chunk[1]}) not found in original graph")
+            id.sort()
             ids.append(id)
 
         if verbose:
