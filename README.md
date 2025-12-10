@@ -1,7 +1,6 @@
-# Introduction
-mfrpy is a Python package for finding the minimal functional routes of signal transduction networks. The package builds on work done at Pennsylvania State University by Réka Albert, Rui-Sheng Wang, and others. This is part of the *rtmod* pipeline for calculating the modulus of a family of routes.  This is done in two parts - first, the graph is expanded by the *update_expand.py* method. Our approach sees expansion mediated by an update table, simplifying computations in lieu of graph-theoretic expansion "by hand". For users interested in expansion, see [1]. Secondly, the minimal functional routes, minimal subgraphs of the expanded graph, are found using *sgmfr.py*, an algorithm adopted into Python from [2]. After computation, the minimal routes are returned in terms of original graph vertices and edges to the user. The following is meant to be an introduction to the package for novel users. For a more thorough explanation, refer to *rtmod tutorial.ipynb*. For more information on signal transduction networks in general, see [3].
+**mfrpy** is a Python package for finding the minimal functional routes of signal transduction networks. The package builds on work done at Pennsylvania State University by Réka Albert, Rui-Sheng Wang, and others. This is part of the **rtmod** pipeline for calculating the modulus of a family of routes.  This is done in two parts - first, the graph is expanded by the `update_expand.py` method. Our approach sees expansion mediated by an update table, simplifying computations in lieu of graph-theoretic expansion "by hand". For users interested in expansion, see [1]. Secondly, the minimal functional routes, minimal subgraphs of the expanded graph, are found using `sgmfr.py`, an algorithm adopted into Python from [2]. After computation, the minimal routes are returned in terms of original graph vertices and edges to the user. The following is meant to be an introduction to the package for novel users. For a more thorough explanation, refer to `rtmod tutorial.ipynb`. For more information on signal transduction networks in general, see [3].
 
-# mfrpy: Package Initialization
+## Setup
 
 ### Import the module:
 
@@ -14,6 +13,8 @@ from mfrpy import sgmfr
 ```py
 from mfrpy.examplegraphs import igraph_graph
 ```
+
+## Initialization
 
 ### Initialize the example graphs:
 
@@ -105,6 +106,9 @@ acyclic.es["inhibition"] = [0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0]
 
 Where 1 indicates an inhibitory edge while 0 indicates activation
 
+## Contributions
+
+**mfrpy** was conceived by Jason Cory Brunson in collaboration with Luis Sordo Vieira. Initial development by Igor Sokolov and continuing development by Sean Hershkowitz.
 
 ## References
 
