@@ -1,26 +1,42 @@
+"""
+Tests for update_expand module functions
+Tests graph expansion and update table computation
+"""
+
 import unittest
-from igraph import Graph
-from sympy.logic.boolalg import Xnor
-from mfrpy import update_expand, sgmfr
-from mfrpy.examplegraphs import igraph_graph
+from mfrpy.test.test_setup import (
+    HAS_IGRAPH, HAS_MFRPY, HAS_EXAMPLEGRAPHS,
+    Graph, update_expand, sgmfr, igraph_graph
+)
+
+try:
+    from sympy.logic.boolalg import Xnor
+    HAS_SYMPY = True
+except ImportError:
+    HAS_SYMPY = False
 
 
-class testing(unittest.TestCase):
+class TestUpdateExpand(unittest.TestCase):
+    @unittest.skipUnless(HAS_IGRAPH and HAS_MFRPY and HAS_EXAMPLEGRAPHS, "Requires igraph, mfrpy, and example graphs")
     def test_acyclic_expansion(self):
+        """Test expansion of acyclic graph matches expected result"""
         expanded_dag = update_expand.expand(
-        igraph_graph.dag,
-        update_expand.updates(igraph_graph.dag, igraph_graph.dag.es["synergy"], [])
+            igraph_graph.dag,
+            update_expand.updates(igraph_graph.dag, igraph_graph.dag.es["synergy"], [])
         )
         assert expanded_dag.isomorphic(igraph_graph.exp_dag), "not isomorphic"
 
+    @unittest.skipUnless(HAS_IGRAPH and HAS_MFRPY and HAS_EXAMPLEGRAPHS, "Requires igraph, mfrpy, and example graphs")
     def test_cyclic_expansion(self):
+        """Test expansion of cyclic graph matches expected result"""
         expanded_dcg = update_expand.expand(
-        igraph_graph.dcg,
-        update_expand.updates(
-        igraph_graph.dcg, igraph_graph.dcg.es["synergy"], []
-        ))
+            igraph_graph.dcg,
+            update_expand.updates(
+                igraph_graph.dcg, igraph_graph.dcg.es["synergy"], []
+            ))
         assert expanded_dcg.isomorphic(igraph_graph.exp_dcg), "not isomorphic"
 
+    @unittest.skipUnless(HAS_IGRAPH and HAS_MFRPY and HAS_EXAMPLEGRAPHS and HAS_SYMPY, "Requires igraph, mfrpy, example graphs, and sympy")
     def test_update_table(self):
         correct = [
         ("i", ""), ("a", "i"), ("b", "(i&d)"), ("c", "i"),
@@ -41,6 +57,7 @@ class testing(unittest.TestCase):
                     assert Xnor(pair[1], couple[1]), "expressions not equivalent"
 
     def test_involution(self):
+        """Test involution property - applying twice returns original"""
         synergies_and_edges = [[1, 2, 3, 4, 5], [
         [(2, 4), (1, 4)], [(2, 4), (3, 4)],
         [(0, 1)], [(0, 2)], [(0, 3)]
@@ -55,7 +72,9 @@ class testing(unittest.TestCase):
         assert update_expand.involution(
         update_expand.involution(synergies_and_edges)) == synergies_and_edges
 
+    @unittest.skipUnless(HAS_IGRAPH and HAS_MFRPY and HAS_EXAMPLEGRAPHS, "Requires igraph, mfrpy, and example graphs")
     def test_priming(self):
+        """Test prime() function with example graph"""
         syns = [3,4,5,1,1,2,2]
         edgelist = [
             (0,1), (0,2), (0,3), (1,4),
@@ -76,7 +95,10 @@ class testing(unittest.TestCase):
             j += 1
         assert set(actual) == set(correct), "edge-synergy pairs do not match"
 
+    @unittest.skipUnless(HAS_IGRAPH and HAS_MFRPY, "Requires igraph and mfrpy")
     def test_sgmfr(self):
+        """Test sgmfr.get_mfrs function"""
+        # This test is now in test_mfr_processing.py
         pass
 
 if __name__ == '__main__':
