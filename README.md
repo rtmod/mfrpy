@@ -4,7 +4,7 @@
 
 ## Authors
 
-Igor Sokolov, Cory Brunson, Sean Hershkowitz
+Igor Sokolov, Sean Hershkowitz, Luis Sordo Vieira, Cory Brunson
 
 ## Purpose
 

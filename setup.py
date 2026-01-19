@@ -3,7 +3,7 @@ from distutils.core import setup
 setup(
     name='mfrpy',
     version='0.1.0',
-    author='Igor Sokolov, Cory Brunson, Sean Hershkowitz',
+    author='Igor Sokolov, Sean Hershkowitz, Luis Sordo Vieira, Cory Brunson',
     author_email='jason.brunson@medicine.ufl.edu',
     scripts=[],
     url='',
