@@ -15,7 +15,7 @@ The calculation of MFRs is done in two parts:
 
 After computation, the MFRs are returned in terms of original graph vertices and edges to the user. The following is meant to be an introduction to the package for novel users. For a more thorough explanation, refer to `rtmod tutorial.ipynb`. For more information on signal transduction networks in general, see [3].
 
-# mfrpy: Package Initialization
+## Setup
 
 ### Import the module:
 
@@ -28,6 +28,8 @@ from mfrpy import sgmfr
 ```py
 from mfrpy.examplegraphs import igraph_graph
 ```
+
+## Initialization
 
 ### Initialize the example graphs:
 
@@ -119,6 +121,9 @@ acyclic.es["inhibition"] = [0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0]
 
 Where 1 indicates an inhibitory edge while 0 indicates activation
 
+## Contributions
+
+**mfrpy** was conceived by Jason Cory Brunson in collaboration with Luis Sordo Vieira. Initial development by Igor Sokolov and continuing development by Sean Hershkowitz.
 
 ## References
 
