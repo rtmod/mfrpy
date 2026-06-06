@@ -6,21 +6,42 @@ from igraph import Graph
 from mfrpy import update_expand
 from sympy.logic.boolalg import to_dnf
 
-def get_mfrs(graph, source, target, expanded = False, verbose = False, mode = "es"):
+
+def _default_max_iterations(graph, num_sources):
+    """Graph-aware iteration cap for the bottom-up MFR search.
+
+    Node count alone is too small: branching partial MFRs can grow much
+    faster than |V|, especially with cycles and multiple sources. Scale
+    with both |V| and |E|, and with the number of source nodes.
     """
-    Given a graph, source node, and target node, returns the number of MFRs
-    from source to target and all MFRs.
+    n = graph.vcount()
+    m = graph.ecount()
+    k = max(1, num_sources)
+    return max(n * n * k, m * n, n * 100)
+
+
+def get_mfrs(graph, source, target, expanded = False, verbose = False, mode = "es", max_iterations = None):
+    """
+    Given a graph, one or more source nodes, and a target node, returns all
+    minimal functional routes (MFRs) from the source set to the target, and
+    their count.
 
     Uses *python-igraph*:
     http://igraph.org/python/
 
     Parameters:
     graph  -- *igraph* Graph object
-    source -- array of integer indices of source node
+    source -- integer index or list of integer indices of source node(s).
+              Multiple sources are supported: each MFR may terminate at any
+              node in `source`. Synergistic (AND) combinations are expressed
+              via composite nodes in the expanded graph.
     target -- integer index of target node
     expanded -- if the input graph is already expanded
     verbose -- option to display MFRs, defaults to False
     mode -- output option, defaults to "es"
+    max_iterations -- safety cap on the main loop to guarantee termination
+                      on pathological graphs. If None (default), a cap is
+                      derived from graph size and source count.
 
     Supported output options:
     "em" -- returns edge matrices
@@ -28,6 +49,12 @@ def get_mfrs(graph, source, target, expanded = False, verbose = False, mode = "e
     "es" -- returns edge sequence indices
 
     """
+
+    # Normalize source: accept a single int as well as a list/tuple/set
+    if isinstance(source, int):
+        source = [source]
+    else:
+        source = list(source)
 
     # Extract attributes from graph if they exist
     oggraph = graph
@@ -47,6 +74,10 @@ def get_mfrs(graph, source, target, expanded = False, verbose = False, mode = "e
             graph,
             update_expand.updates(graph, synergistic, negatory)
             )
+
+    if max_iterations is None:
+        max_iterations = _default_max_iterations(graph, len(source))
+
     # Initialization of variables for main loop
     pointer = 0
     num = 1
@@ -69,7 +100,18 @@ def get_mfrs(graph, source, target, expanded = False, verbose = False, mode = "e
         print("nodes with no predecessors (other than source):", redundant, graph.vs[redundant]["name"])
 
     # Main loop, while some partial MFRs remain unfinished
+    iterations = 0
     while pointer < num:
+        iterations += 1
+        if iterations > max_iterations:
+            raise RuntimeError(
+                "MFR search exceeded iteration cap ({}) for graph with "
+                "{} nodes and {} edges; partial results are not returned. "
+                "Increase max_iterations or inspect the graph for "
+                "pathological cycles.".format(
+                    max_iterations, graph.vcount(), graph.ecount()
+                )
+            )
         flag = False
         c_MFR = all_MFRs[pointer]
         c_tag = tags[pointer]
@@ -147,6 +189,16 @@ def get_mfrs(graph, source, target, expanded = False, verbose = False, mode = "e
                 # Appends new rows to current partial MFR
                 else:
                     for v in c_preds:
+                        # Cycle / multi-source guard: if v is already a "from"
+                        # node in the current MFR (i.e. already in `stems`),
+                        # do not append it again. Without this, graphs with
+                        # cycles -- amplified by multiple sources -- keep
+                        # adding duplicate rows and the main loop never
+                        # terminates (this is the dendritic ex-dendritic.py
+                        # multi-input infinite loop).
+                        if v in stems:
+                            continue
+
                         temp2 = net[v]
 
                         if verbose:
